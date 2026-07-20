@@ -34,7 +34,7 @@ jobs:
         run: npm ci
       - name: Validate articles and build
         env:
-          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          NEXT_PUBLIC_BASE_PATH: ""
         run: npm run build:pages
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
