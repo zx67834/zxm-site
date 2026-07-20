@@ -1,0 +1,31 @@
+[
+  {
+    "slug": "hmv-gameshell-4",
+    "kind": "pdf",
+    "title": "HMV 靶机：Gameshell 4",
+    "summary": "Gameshell 4 靶机渗透过程与关键步骤复盘。",
+    "publishedAt": "2026-07-20",
+    "category": "复盘",
+    "source": "/content/hmv-gameshell-4.pdf",
+    "pages": 4
+  },
+  {
+    "slug": "hmv-helix",
+    "kind": "pdf",
+    "title": "HMV 靶机：Helix",
+    "summary": "Helix 靶机渗透过程、思路记录与结果整理。",
+    "publishedAt": "2026-07-20",
+    "category": "复盘",
+    "source": "/content/hmv-helix.pdf",
+    "pages": 2
+  },
+  {
+    "slug": "terminal-notes",
+    "kind": "markdown",
+    "title": "伪终端应该留下什么",
+    "summary": "记录个人网站里伪终端的交互边界，以及保留它的理由。",
+    "publishedAt": "2026-07-19",
+    "category": "文章",
+    "source": "/content/terminal-notes.md"
+  }
+]
