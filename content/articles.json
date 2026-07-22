@@ -1,5 +1,14 @@
 [
   {
+    "slug": "ir1-image-webshell-root",
+    "kind": "markdown",
+    "title": "IR1 靶机复盘：从图片马到 root",
+    "summary": "从伪装图片中分离 PHP 木马、还原 ZWCQA 编码与 WebShell 链路，并利用 safeguard 定时任务的信任边界缺陷获取 root。",
+    "publishedAt": "2026-07-23",
+    "category": "复盘",
+    "source": "/content/ir1.md"
+  },
+  {
     "slug": "sourcecode-race-condition",
     "kind": "markdown",
     "title": "SourceCode 靶机复盘：从 Webshell 到符号链接竞争提权",
