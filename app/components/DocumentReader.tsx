@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 type DocumentReaderProps = {
   kind: "markdown" | "pdf";
@@ -9,23 +9,60 @@ type DocumentReaderProps = {
 };
 
 function MarkdownBody({ source }: { source: string }) {
+  const lines = source.split("\n");
+  const blocks: ReactNode[] = [];
   let inCode = false;
-  return <article className="markdown-body markdown-body--page">
-    {source.split("\n").map((line, index) => {
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
       if (line.startsWith("```")) {
         inCode = !inCode;
-        return null;
+        continue;
       }
-      if (inCode) return <pre key={index}><code>{line}</code></pre>;
-      if (line.startsWith("# ")) return <h1 key={index}>{line.slice(2)}</h1>;
-      if (line.startsWith("## ")) return <h2 key={index}>{line.slice(3)}</h2>;
-      if (line.startsWith("### ")) return <h3 key={index}>{line.slice(4)}</h3>;
-      if (line.startsWith("- ")) return <li key={index}>{line.slice(2)}</li>;
-      if (line.startsWith("> ")) return <blockquote key={index}>{line.slice(2)}</blockquote>;
-      if (!line.trim()) return <br key={index} />;
-      return <p key={index}>{line.replaceAll("`", "")}</p>;
-    })}
-  </article>;
+      if (inCode) {
+        blocks.push(<pre key={index}><code>{line}</code></pre>);
+        continue;
+      }
+
+      const image = line.match(/^!\[([^\]]*)\]\((?:<)?([^)>]+)(?:>)?\)$/);
+      if (image) {
+        const [, alt, rawSrc] = image;
+        const src = rawSrc.startsWith("/")
+          ? `${process.env.NEXT_PUBLIC_BASE_PATH || ""}${rawSrc}`
+          : rawSrc;
+        blocks.push(<figure className="markdown-figure" key={index}>
+          <img className="markdown-image" src={src} alt={alt} loading="lazy" />
+          {alt && <figcaption>{alt}</figcaption>}
+        </figure>);
+        continue;
+      }
+
+      if (line.startsWith("| ") && /^\|[\s|:-]+\|$/.test(lines[index + 1] || "")) {
+        const cells = (value: string) => value.split("|").slice(1, -1).map(cell => cell.trim());
+        const header = cells(line);
+        const rows: string[][] = [];
+        index += 2;
+        while (lines[index]?.startsWith("| ")) {
+          rows.push(cells(lines[index]));
+          index += 1;
+        }
+        index -= 1;
+        blocks.push(<div className="markdown-table-wrap" key={`table-${index}`}><table className="markdown-table">
+          <thead><tr>{header.map((cell, cellIndex) => <th key={cellIndex}>{cell}</th>)}</tr></thead>
+          <tbody>{rows.map((row, rowIndex) => <tr key={rowIndex}>{row.map((cell, cellIndex) => <td key={cellIndex}>{cell}</td>)}</tr>)}</tbody>
+        </table></div>);
+        continue;
+      }
+
+      if (line.startsWith("# ")) blocks.push(<h1 key={index}>{line.slice(2)}</h1>);
+      else if (line.startsWith("## ")) blocks.push(<h2 key={index}>{line.slice(3)}</h2>);
+      else if (line.startsWith("### ")) blocks.push(<h3 key={index}>{line.slice(4)}</h3>);
+      else if (line.startsWith("- ")) blocks.push(<li key={index}>{line.slice(2)}</li>);
+      else if (line.startsWith("> ")) blocks.push(<blockquote key={index}>{line.slice(2)}</blockquote>);
+      else if (!line.trim()) blocks.push(<br key={index} />);
+      else blocks.push(<p key={index}>{line.replaceAll("`", "")}</p>);
+  }
+
+  return <article className="markdown-body markdown-body--page">{blocks}</article>;
 }
 
 export default function DocumentReader({ kind, source, title }: DocumentReaderProps) {

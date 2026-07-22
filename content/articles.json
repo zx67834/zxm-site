@@ -1,5 +1,14 @@
 [
   {
+    "slug": "sourcecode-race-condition",
+    "kind": "markdown",
+    "title": "SourceCode 靶机复盘：从 Webshell 到符号链接竞争提权",
+    "summary": "围绕 cp -L 符号链接竞争，复盘实际通关路径、另一条旁路解法，以及作者用“八分钟拆弹”构造的题目主线。",
+    "publishedAt": "2026-07-22",
+    "category": "复盘",
+    "source": "/content/sourcecode.md"
+  },
+  {
     "slug": "hmv-gameshell-4",
     "kind": "pdf",
     "title": "HMV 靶机：Gameshell 4",
