@@ -11,15 +11,38 @@ type DocumentReaderProps = {
 function MarkdownBody({ source }: { source: string }) {
   const lines = source.split("\n");
   const blocks: ReactNode[] = [];
-  let inCode = false;
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index];
       if (line.startsWith("```")) {
-        inCode = !inCode;
+        const code: string[] = [];
+        const language = line.slice(3).trim();
+        index += 1;
+        while (index < lines.length && !lines[index].startsWith("```")) {
+          code.push(lines[index]);
+          index += 1;
+        }
+        blocks.push(<pre className="markdown-code" key={`code-${index}`}>
+          {language && <span className="markdown-code-language">{language}</span>}
+          <code>{code.join("\n")}</code>
+        </pre>);
         continue;
       }
-      if (inCode) {
-        blocks.push(<pre key={index}><code>{line}</code></pre>);
+
+      const imagePattern = /!\[([^\]]*)\]\((?:<)?([^)>]+)(?:>)?\)/g;
+      const galleryImages = [...line.matchAll(imagePattern)];
+      if (galleryImages.length > 1 && !line.replace(imagePattern, "").trim()) {
+        blocks.push(<div className="markdown-gallery" key={`gallery-${index}`}>
+          {galleryImages.map((match, imageIndex) => {
+            const [, alt, rawSrc] = match;
+            const src = rawSrc.startsWith("/")
+              ? `${process.env.NEXT_PUBLIC_BASE_PATH || ""}${rawSrc}`
+              : rawSrc;
+            return <figure className="markdown-figure" key={`${index}-${imageIndex}`}>
+              <img className="markdown-image" src={src} alt={alt} loading="lazy" />
+              {alt && <figcaption>{alt}</figcaption>}
+            </figure>;
+          })}
+        </div>);
         continue;
       }
 

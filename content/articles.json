@@ -1,5 +1,14 @@
 [
   {
+    "slug": "badbox-wordpress-landlock-root",
+    "kind": "markdown",
+    "title": "BadBox 靶机复盘：从 WordPress 到 Landlock 提权",
+    "summary": "从 WordPress 用户枚举与弱口令进入后台，通过主题编辑器获得 Shell，再分析 BusyBox、SUID Bash 与 Landlock 的权限边界。",
+    "publishedAt": "2026-07-24",
+    "category": "复盘",
+    "source": "/content/badbox.md"
+  },
+  {
     "slug": "ir1-image-webshell-root",
     "kind": "markdown",
     "title": "IR1 靶机复盘：从图片马到 root",

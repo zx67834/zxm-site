@@ -53,6 +53,12 @@ button,input { font:inherit; }
 .markdown-figure { margin: 1.4rem 0; }
 .markdown-image { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; background: #0b0e14; }
 .markdown-figure figcaption { margin-top: .55rem; color: var(--muted); font-size: .84rem; text-align: center; }
+.markdown-gallery { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin:1.4rem 0; }
+.markdown-gallery .markdown-figure { display:flex; flex-direction:column; margin:0; }
+.markdown-gallery .markdown-image { flex:1; min-height:180px; max-height:340px; object-fit:contain; }
+.markdown-code { position:relative; margin:1.25rem 0; padding:2.5rem 1.25rem 1.1rem; overflow:auto; border:1px solid rgba(110,231,183,.12); border-radius:10px; background:#070a09; color:#a7f3d0; line-height:1.65; }
+.markdown-code code { display:block; white-space:pre; }
+.markdown-code-language { position:absolute; top:.65rem; right:.85rem; color:rgba(110,231,183,.42); font:9px/1 ui-monospace,monospace; letter-spacing:.16em; text-transform:uppercase; }
 .markdown-table-wrap { overflow-x: auto; margin: 1.25rem 0; }
 .markdown-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
 .markdown-table th, .markdown-table td { padding: .7rem; border: 1px solid var(--line); text-align: left; vertical-align: top; }
@@ -214,6 +220,8 @@ button,input { font:inherit; }
   .reader-backdrop { padding:6px; }
   .reader-panel { width:calc(100vw - 12px); height:calc(100dvh - 12px); border-radius:12px; }
   .markdown-body { padding:34px 22px 64px; font-size:16px; }
+  .markdown-gallery { grid-template-columns:1fr; }
+  .markdown-gallery .markdown-image { min-height:0; max-height:none; }
   .contribution-board { justify-content:flex-start; }
 }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; animation-iteration-count:1!important; scroll-behavior:auto!important; } }
