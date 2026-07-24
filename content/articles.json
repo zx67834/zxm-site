@@ -1,5 +1,14 @@
 [
   {
+    "slug": "boom-wordpress-sudo-root",
+    "kind": "markdown",
+    "title": "Boom 靶机复盘：WordPress 漏洞到 sudo 提权",
+    "summary": "从 WordPress 预认证漏洞链获得命令执行，稳定 Shell、发现 SSH 凭据，最终利用可写的免密 sudo 脚本取得 root。",
+    "publishedAt": "2026-07-24",
+    "category": "复盘",
+    "source": "/content/boom.md"
+  },
+  {
     "slug": "badbox-wordpress-landlock-root",
     "kind": "markdown",
     "title": "BadBox 靶机复盘：从 WordPress 到 Landlock 提权",
