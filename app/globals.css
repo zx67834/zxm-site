@@ -146,7 +146,12 @@ button,input { font:inherit; }
 .reader-panel header h2 { margin:4px 0 0; font-size:21px; }
 .reader-panel header button { border:0; background:none; color:white; cursor:pointer; font-size:28px; }
 .markdown-body { width:100%; max-width:none; min-height:0; flex:1; overflow:auto; margin:0; padding:clamp(48px,7vh,84px) clamp(44px,11vw,180px) 90px; color:rgba(255,255,255,.8); font-size:17px; line-height:2; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:rgba(129,140,248,.55) rgba(255,255,255,.025); }
-.markdown-body h1,.markdown-body h2,.markdown-body h3 { color:white; margin-top:1.6em; }
+.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4 { color:white; margin-top:1.6em; }
+.markdown-body strong { color:#fff; font-weight:650; }
+.markdown-body em { color:rgba(255,255,255,.88); font-style:italic; }
+.markdown-body p code,.markdown-body li code,.markdown-body td code,.markdown-body th code,.markdown-body blockquote code { padding:.12em .4em; border-radius:5px; background:rgba(110,231,183,.1); color:#a7f3d0; font:0.88em/1.5 ui-monospace,monospace; }
+.markdown-body a { color:#a5b4fc; text-decoration:underline; text-underline-offset:3px; }
+.markdown-body hr { border:0; border-top:1px solid var(--line); margin:1.8em 0; }
 .markdown-body blockquote { border-left:3px solid #818cf8; margin-left:0; padding-left:16px; color:rgba(255,255,255,.6); }
 .markdown-body pre { margin:0; padding:2px 12px; background:#08080c; color:#a7f3d0; }
 .pdf-frame { width:100%; min-height:0; flex:1; border:0; background:#202124; }

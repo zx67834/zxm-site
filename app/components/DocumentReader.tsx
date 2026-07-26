@@ -8,6 +8,42 @@ type DocumentReaderProps = {
   title: string;
 };
 
+/** Inline markdown: **bold**, *italic*, `code`, [text](url) */
+function renderInline(text: string): ReactNode[] {
+  const pattern = /(\*\*[^*]+?\*\*|\*[^*]+?\*|`[^`]+?`|\[[^\]]+?\]\([^)]+?\))/g;
+  const nodes: ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let key = 0;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(text.slice(lastIndex, match.index));
+    }
+
+    const token = match[0];
+    if (token.startsWith("**") && token.endsWith("**")) {
+      nodes.push(<strong key={`b-${key++}`}>{token.slice(2, -2)}</strong>);
+    } else if (token.startsWith("*") && token.endsWith("*")) {
+      nodes.push(<em key={`i-${key++}`}>{token.slice(1, -1)}</em>);
+    } else if (token.startsWith("`") && token.endsWith("`")) {
+      nodes.push(<code key={`c-${key++}`}>{token.slice(1, -1)}</code>);
+    } else {
+      const link = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+      if (link) {
+        nodes.push(<a key={`a-${key++}`} href={link[2]} target="_blank" rel="noreferrer">{link[1]}</a>);
+      } else {
+        nodes.push(token);
+      }
+    }
+
+    lastIndex = match.index + token.length;
+  }
+
+  if (lastIndex < text.length) nodes.push(text.slice(lastIndex));
+  return nodes;
+}
+
 function MarkdownBody({ source }: { source: string }) {
   const lines = source.split("\n");
   const blocks: ReactNode[] = [];
@@ -70,19 +106,22 @@ function MarkdownBody({ source }: { source: string }) {
         }
         index -= 1;
         blocks.push(<div className="markdown-table-wrap" key={`table-${index}`}><table className="markdown-table">
-          <thead><tr>{header.map((cell, cellIndex) => <th key={cellIndex}>{cell}</th>)}</tr></thead>
-          <tbody>{rows.map((row, rowIndex) => <tr key={rowIndex}>{row.map((cell, cellIndex) => <td key={cellIndex}>{cell}</td>)}</tr>)}</tbody>
+          <thead><tr>{header.map((cell, cellIndex) => <th key={cellIndex}>{renderInline(cell)}</th>)}</tr></thead>
+          <tbody>{rows.map((row, rowIndex) => <tr key={rowIndex}>{row.map((cell, cellIndex) => <td key={cellIndex}>{renderInline(cell)}</td>)}</tr>)}</tbody>
         </table></div>);
         continue;
       }
 
-      if (line.startsWith("# ")) blocks.push(<h1 key={index}>{line.slice(2)}</h1>);
-      else if (line.startsWith("## ")) blocks.push(<h2 key={index}>{line.slice(3)}</h2>);
-      else if (line.startsWith("### ")) blocks.push(<h3 key={index}>{line.slice(4)}</h3>);
-      else if (line.startsWith("- ")) blocks.push(<li key={index}>{line.slice(2)}</li>);
-      else if (line.startsWith("> ")) blocks.push(<blockquote key={index}>{line.slice(2)}</blockquote>);
+      if (line.startsWith("# ")) blocks.push(<h1 key={index}>{renderInline(line.slice(2))}</h1>);
+      else if (line.startsWith("## ")) blocks.push(<h2 key={index}>{renderInline(line.slice(3))}</h2>);
+      else if (line.startsWith("### ")) blocks.push(<h3 key={index}>{renderInline(line.slice(4))}</h3>);
+      else if (line.startsWith("#### ")) blocks.push(<h4 key={index}>{renderInline(line.slice(5))}</h4>);
+      else if (/^\d+\.\s/.test(line)) blocks.push(<li key={index}>{renderInline(line.replace(/^\d+\.\s/, ""))}</li>);
+      else if (line.startsWith("- ")) blocks.push(<li key={index}>{renderInline(line.slice(2))}</li>);
+      else if (line.startsWith("> ")) blocks.push(<blockquote key={index}>{renderInline(line.slice(2))}</blockquote>);
+      else if (/^---+$/.test(line.trim())) blocks.push(<hr key={index} />);
       else if (!line.trim()) blocks.push(<br key={index} />);
-      else blocks.push(<p key={index}>{line.replaceAll("`", "")}</p>);
+      else blocks.push(<p key={index}>{renderInline(line)}</p>);
   }
 
   return <article className="markdown-body markdown-body--page">{blocks}</article>;
