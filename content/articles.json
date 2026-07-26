@@ -1,5 +1,14 @@
 [
   {
+    "slug": "enshi-family-5-day",
+    "kind": "markdown",
+    "title": "恩施亲子 5 日游攻略（温州出发）",
+    "summary": "温州出发、一家三口去恩施玩 5 天：住市区，两天看大峡谷和屏山，一天进腾龙洞歇脚，首尾两天只负责到达和返程。",
+    "publishedAt": "2026-07-27",
+    "category": "文章",
+    "source": "/content/enshi-family-5-day.md"
+  },
+  {
     "slug": "boom-wordpress-sudo-root",
     "kind": "markdown",
     "title": "Boom 靶机复盘：WordPress 漏洞到 sudo 提权",
