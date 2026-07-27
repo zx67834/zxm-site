@@ -45,7 +45,7 @@ function renderInline(text: string): ReactNode[] {
 }
 
 function MarkdownBody({ source }: { source: string }) {
-  const lines = source.split("\n");
+  const lines = source.split(/\r?\n/);
   const blocks: ReactNode[] = [];
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index];

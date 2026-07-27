@@ -1,5 +1,14 @@
 [
   {
+    "slug": "11s-git-printspoofer",
+    "kind": "markdown",
+    "title": "11s 靶机复盘：Git 泄露到 PrintSpoofer 提权",
+    "summary": "从 8080 端口 .git 泄露拿到用户名与默认口令线索，经 WinRM 进入后利用上传黑名单大小写绕过切到 IIS AppPool，再用 PrintSpoofer 提到 SYSTEM。",
+    "publishedAt": "2026-07-27",
+    "category": "复盘",
+    "source": "/content/11s.md"
+  },
+  {
     "slug": "enshi-family-5-day",
     "kind": "markdown",
     "title": "恩施亲子 5 日游攻略（温州出发）",
