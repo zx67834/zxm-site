@@ -1,5 +1,14 @@
 [
   {
+    "slug": "code-opencode-sudo-root",
+    "kind": "markdown",
+    "title": "Code 靶机复盘：OpenCode API 到 sudo 提权",
+    "summary": "从页面注释定位 OpenCode，用弱口令打通 Session Shell API 拿到 beehack，再借 sudo 免密 opencode 拉起本机 root 服务完成提权。",
+    "publishedAt": "2026-08-09",
+    "category": "复盘",
+    "source": "/content/code.md"
+  },
+  {
     "slug": "11s-git-printspoofer",
     "kind": "markdown",
     "title": "11s 靶机复盘：Git 泄露到 PrintSpoofer 提权",
