@@ -1,5 +1,14 @@
 [
   {
+    "slug": "cock-cockpit-tar-root",
+    "kind": "markdown",
+    "title": "Cock 靶机复盘：Cockpit RCE 到 tar 通配符提权",
+    "summary": "mono 出的 Cock 靶机：从遗留台账拿到 Cockpit 弱口令，利用 CVE-2026-4802 进入 svc_vpn，再借日志明文口令切到 cock，最终用 tar 通配符 checkpoint 提到 root。",
+    "publishedAt": "2026-08-10",
+    "category": "复盘",
+    "source": "/content/mono.md"
+  },
+  {
     "slug": "code-opencode-sudo-root",
     "kind": "markdown",
     "title": "Code 靶机复盘：OpenCode API 到 sudo 提权",
