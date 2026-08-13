@@ -1,5 +1,14 @@
 [
   {
+    "slug": "core-wangzha-sudo-escalation",
+    "kind": "markdown",
+    "title": "Core 靶机复盘：王炸方案进阶",
+    "summary": "作者说这台很简单：入口致敬测试人员，切 111 复用 Bomb 提权，最后一跳是王炸方案进阶版的符号链接劫持。",
+    "publishedAt": "2026-08-13",
+    "category": "复盘",
+    "source": "/content/core.md"
+  },
+  {
     "slug": "ir2-rsa-webshell-race-root",
     "kind": "markdown",
     "title": "IR2 靶机复盘：弱 RSA 后门到竞态提权",
