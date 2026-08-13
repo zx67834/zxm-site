@@ -1,5 +1,14 @@
 [
   {
+    "slug": "ir2-rsa-webshell-race-root",
+    "kind": "markdown",
+    "title": "IR2 靶机复盘：弱 RSA 后门到竞态提权",
+    "summary": "ftasy 的 IR1 续作。对照作者 WP 走通弱 RSA 后门与 safeguard 竞态；复盘里如实记录了没找到 uqloads 提示、以及试 bd 误删 root flag。",
+    "publishedAt": "2026-08-13",
+    "category": "复盘",
+    "source": "/content/ir2.md"
+  },
+  {
     "slug": "cock-cockpit-tar-root",
     "kind": "markdown",
     "title": "Cock 靶机复盘：Cockpit RCE 到 tar 通配符提权",
