@@ -1,5 +1,14 @@
 [
   {
+    "slug": "stay-internship-day",
+    "kind": "markdown",
+    "title": "STAY：实习的一天",
+    "summary": "学校和电信合作实习的日记：培训、词元天下、产业园走访，以及夹在杠杠里那些不太方便直接说出口的碎碎念。",
+    "publishedAt": "2026-08-16",
+    "category": "日记",
+    "source": "/content/stay.md"
+  },
+  {
     "slug": "core-wangzha-sudo-escalation",
     "kind": "markdown",
     "title": "Core 靶机复盘：王炸方案进阶",

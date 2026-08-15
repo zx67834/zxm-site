@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type KeyboardEvent, type ReactNode } from "react";
 
 type DocumentReaderProps = {
   kind: "markdown" | "pdf";
@@ -8,9 +8,31 @@ type DocumentReaderProps = {
   title: string;
 };
 
-/** Inline markdown: **bold**, *italic*, `code`, [text](url) */
+function Spoiler({ children }: { children: ReactNode }) {
+  const [revealed, setRevealed] = useState(false);
+
+  const toggle = () => setRevealed(value => !value);
+  const onKeyDown = (event: KeyboardEvent<HTMLSpanElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      toggle();
+    }
+  };
+
+  return <span
+    className={`markdown-spoiler${revealed ? " is-revealed" : ""}`}
+    onClick={toggle}
+    onKeyDown={onKeyDown}
+    role="button"
+    tabIndex={0}
+    aria-expanded={revealed}
+    aria-label={revealed ? "隐藏内容" : "显示隐藏内容"}
+  >{children}</span>;
+}
+
+/** Inline markdown: **bold**, *italic*, `code`, [text](url), ~~strike~~, ||spoiler|| */
 function renderInline(text: string): ReactNode[] {
-  const pattern = /(\*\*[^*]+?\*\*|\*[^*]+?\*|`[^`]+?`|\[[^\]]+?\]\([^)]+?\))/g;
+  const pattern = /(\|\|.+?\|\||~~.+?~~|\*\*[^*]+?\*\*|\*[^*]+?\*|`[^`]+?`|\[[^\]]+?\]\([^)]+?\))/g;
   const nodes: ReactNode[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
@@ -22,7 +44,11 @@ function renderInline(text: string): ReactNode[] {
     }
 
     const token = match[0];
-    if (token.startsWith("**") && token.endsWith("**")) {
+    if (token.startsWith("||") && token.endsWith("||")) {
+      nodes.push(<Spoiler key={`s-${key++}`}>{renderInline(token.slice(2, -2))}</Spoiler>);
+    } else if (token.startsWith("~~") && token.endsWith("~~")) {
+      nodes.push(<span className="markdown-strike" key={`d-${key++}`}>{renderInline(token.slice(2, -2))}</span>);
+    } else if (token.startsWith("**") && token.endsWith("**")) {
       nodes.push(<strong key={`b-${key++}`}>{token.slice(2, -2)}</strong>);
     } else if (token.startsWith("*") && token.endsWith("*")) {
       nodes.push(<em key={`i-${key++}`}>{token.slice(1, -1)}</em>);
@@ -64,19 +90,38 @@ function MarkdownBody({ source }: { source: string }) {
         continue;
       }
 
+      const parseImageMeta = (rawAlt: string) => {
+        const widthMatch = rawAlt.match(/^(.*?)(?:\|(\d+))?$/);
+        const alt = (widthMatch?.[1] || "").trim();
+        const width = widthMatch?.[2] ? Number(widthMatch[2]) : undefined;
+        return { alt, width };
+      };
+
+      const renderImage = (rawAlt: string, rawSrc: string, key: string | number) => {
+        const { alt, width } = parseImageMeta(rawAlt);
+        const src = rawSrc.startsWith("/")
+          ? `${process.env.NEXT_PUBLIC_BASE_PATH || ""}${rawSrc}`
+          : rawSrc;
+        return <figure className={`markdown-figure${width ? " markdown-figure--sized" : ""}`} key={key}>
+          <img
+            className="markdown-image"
+            src={src}
+            alt={alt}
+            loading="lazy"
+            style={width ? { width: `${width}px`, maxWidth: "100%" } : undefined}
+          />
+          {alt && <figcaption>{alt}</figcaption>}
+        </figure>;
+      };
+
       const imagePattern = /!\[([^\]]*)\]\((?:<)?([^)>]+)(?:>)?\)/g;
       const galleryImages = [...line.matchAll(imagePattern)];
       if (galleryImages.length > 1 && !line.replace(imagePattern, "").trim()) {
-        blocks.push(<div className="markdown-gallery" key={`gallery-${index}`}>
+        const sized = galleryImages.some(match => Boolean(parseImageMeta(match[1]).width));
+        blocks.push(<div className={`markdown-gallery${sized ? " markdown-gallery--sized" : ""}`} key={`gallery-${index}`}>
           {galleryImages.map((match, imageIndex) => {
-            const [, alt, rawSrc] = match;
-            const src = rawSrc.startsWith("/")
-              ? `${process.env.NEXT_PUBLIC_BASE_PATH || ""}${rawSrc}`
-              : rawSrc;
-            return <figure className="markdown-figure" key={`${index}-${imageIndex}`}>
-              <img className="markdown-image" src={src} alt={alt} loading="lazy" />
-              {alt && <figcaption>{alt}</figcaption>}
-            </figure>;
+            const [, rawAlt, rawSrc] = match;
+            return renderImage(rawAlt, rawSrc, `${index}-${imageIndex}`);
           })}
         </div>);
         continue;
@@ -84,14 +129,8 @@ function MarkdownBody({ source }: { source: string }) {
 
       const image = line.match(/^!\[([^\]]*)\]\((?:<)?([^)>]+)(?:>)?\)$/);
       if (image) {
-        const [, alt, rawSrc] = image;
-        const src = rawSrc.startsWith("/")
-          ? `${process.env.NEXT_PUBLIC_BASE_PATH || ""}${rawSrc}`
-          : rawSrc;
-        blocks.push(<figure className="markdown-figure" key={index}>
-          <img className="markdown-image" src={src} alt={alt} loading="lazy" />
-          {alt && <figcaption>{alt}</figcaption>}
-        </figure>);
+        const [, rawAlt, rawSrc] = image;
+        blocks.push(renderImage(rawAlt, rawSrc, index));
         continue;
       }
 
@@ -120,7 +159,7 @@ function MarkdownBody({ source }: { source: string }) {
       else if (line.startsWith("- ")) blocks.push(<li key={index}>{renderInline(line.slice(2))}</li>);
       else if (line.startsWith("> ")) blocks.push(<blockquote key={index}>{renderInline(line.slice(2))}</blockquote>);
       else if (/^---+$/.test(line.trim())) blocks.push(<hr key={index} />);
-      else if (!line.trim()) blocks.push(<br key={index} />);
+      else if (!line.trim()) continue;
       else blocks.push(<p key={index}>{renderInline(line)}</p>);
   }
 
