@@ -1,5 +1,14 @@
 [
   {
+    "slug": "iot-mqtt-ruby-cap-root",
+    "kind": "markdown",
+    "title": "IOT 靶机复盘：MQTT 到 root（Ruby 能力 / Copy Fail）",
+    "summary": "HMV IOT：MQTT 保留消息出 redteam 口令；提权可走 ruby3.3 的 cap_setuid，也可走 CVE-2026-31431 Copy Fail。",
+    "publishedAt": "2026-08-18",
+    "category": "复盘",
+    "source": "/content/iot.md"
+  },
+  {
     "slug": "stay-internship-day",
     "kind": "markdown",
     "title": "STAY：实习的一天",
