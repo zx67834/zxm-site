@@ -1,5 +1,14 @@
 [
   {
+    "slug": "tpn-thinkphp-git-dirtypipe",
+    "kind": "markdown",
+    "title": "tpN 靶机复盘：ThinkPHP Git 泄露到 Dirty Pipe",
+    "summary": "8080 ThinkPHP 的 .git 还原出 Session + passthru RCE；www-data 读 .pwd 字典爆破 welcome，IRC 后门走不通后用 Dirty Pipe 到 root。",
+    "publishedAt": "2026-08-24",
+    "category": "复盘",
+    "source": "/content/tpn.md"
+  },
+  {
     "slug": "iot-mqtt-ruby-cap-root",
     "kind": "markdown",
     "title": "IOT 靶机复盘：MQTT 到 root（Ruby 能力 / Copy Fail）",
