@@ -1,5 +1,14 @@
 [
   {
+    "slug": "mazebox-shellinabox-rc-service",
+    "kind": "markdown",
+    "title": "Mazebox 靶机复盘：Shellinabox 到 rc-service 提权",
+    "summary": "首页拼 a–e 得出口令，Shellinabox /top 泄露 /supersecretbackend；lingmj 进箱后借 NOPASSWD rc-service 路径穿越到 root。",
+    "publishedAt": "2026-09-12",
+    "category": "复盘",
+    "source": "/content/mazebox.md"
+  },
+  {
     "slug": "tellme-consul-telnet-docker-escape",
     "kind": "markdown",
     "title": "tellme 靶机复盘：Consul 口令、Telnet 绕过到 Docker 逃逸",
