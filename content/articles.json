@@ -1,5 +1,14 @@
 [
   {
+    "slug": "tellme-consul-telnet-docker-escape",
+    "kind": "markdown",
+    "title": "tellme 靶机复盘：Consul 口令、Telnet 绕过到 Docker 逃逸",
+    "summary": "Consul KV 出 MySQL 口令，CVE-2026-24061 进 entry_node；内网 UDF 借 docker_host 摸到 docker.sock，挂载宿主机根目录拿 root。",
+    "publishedAt": "2026-09-12",
+    "category": "复盘",
+    "source": "/content/tellme.md"
+  },
+  {
     "slug": "tpn-thinkphp-git-dirtypipe",
     "kind": "markdown",
     "title": "tpN 靶机复盘：ThinkPHP Git 泄露到 Dirty Pipe",
