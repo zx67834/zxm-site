@@ -1,17 +1,27 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { articles, getArticleMeta } from "../data/articles";
 import DocumentPage from "./DocumentPage";
 
-export default function ArticleRoute({ slug }: { slug: string }) {
-  const article = articles.find(item => item.slug === slug);
+export default function ArticleRoute() {
+  const [slug, setSlug] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSlug(new URLSearchParams(window.location.search).get("slug") || "");
+  }, []);
+
+  const article = slug ? articles.find(item => item.slug === slug) : undefined;
 
   useEffect(() => {
     if (!article) return;
     document.title = `${article.title} · zxm 的小站`;
     return () => { document.title = "zxm 的小站"; };
   }, [article]);
+
+  if (slug === null) {
+    return <main className="document-page"><p className="document-status">正在打开文章…</p></main>;
+  }
 
   if (!article) {
     return <main className="document-page"><p className="document-status">没有找到这篇文章。</p></main>;
