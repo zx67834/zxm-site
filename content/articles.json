@@ -5,7 +5,7 @@
     "title": "CVE-2026-42271 复盘：LiteLLM 默认 Key 到 MCP stdio 无回显 RCE（春秋云镜）",
     "summary": "春秋云镜：openapi 锁版本后用默认 master key 过鉴权，stdio 测试接口起子进程，DNS 外带并还原大小写拿到 flag。",
     "publishedAt": "2026-09-15",
-    "category": "复盘",
+    "category": "春秋",
     "source": "/content/litellm-cve-2026-42271.md"
   },
   {
@@ -14,7 +14,7 @@
     "title": "Datagram 靶机复盘：UDP AES 挑战到 profile.d 提权",
     "summary": "500/udp 十轮 AES-ECB 自动化拿 longly；排除 /tmp nosuid 假 SUID 后，借 666 的 profile.d 与 cron bash -l 提到 root。",
     "publishedAt": "2026-09-15",
-    "category": "复盘",
+    "category": "渗透测试",
     "source": "/content/datagram.md"
   },
   {
@@ -23,7 +23,7 @@
     "title": "Mazebox 靶机复盘：Shellinabox 到 rc-service 提权",
     "summary": "首页拼 a–e 得出口令，Shellinabox /top 泄露 /supersecretbackend；lingmj 进箱后借 NOPASSWD rc-service 路径穿越到 root。",
     "publishedAt": "2026-09-12",
-    "category": "复盘",
+    "category": "渗透测试",
     "source": "/content/mazebox.md"
   },
   {
@@ -32,7 +32,7 @@
     "title": "tellme 靶机复盘：Consul 口令、Telnet 绕过到 Docker 逃逸",
     "summary": "Consul KV 出 MySQL 口令，CVE-2026-24061 进 entry_node；内网 UDF 借 docker_host 摸到 docker.sock，挂载宿主机根目录拿 root。",
     "publishedAt": "2026-09-12",
-    "category": "复盘",
+    "category": "HackMyVM",
     "source": "/content/tellme.md"
   },
   {
@@ -41,7 +41,7 @@
     "title": "tpN 靶机复盘：ThinkPHP Git 泄露到 Dirty Pipe",
     "summary": "8080 ThinkPHP 的 .git 还原出 Session + passthru RCE；www-data 读 .pwd 字典爆破 welcome，IRC 后门走不通后用 Dirty Pipe 到 root。",
     "publishedAt": "2026-08-24",
-    "category": "复盘",
+    "category": "HackMyVM",
     "source": "/content/tpn.md"
   },
   {
@@ -50,7 +50,7 @@
     "title": "IOT 靶机复盘：MQTT 到 root（Ruby 能力 / Copy Fail）",
     "summary": "HMV IOT：MQTT 保留消息出 redteam 口令；提权可走 ruby3.3 的 cap_setuid，也可走 CVE-2026-31431 Copy Fail。",
     "publishedAt": "2026-08-18",
-    "category": "复盘",
+    "category": "HackMyVM",
     "source": "/content/iot.md"
   },
   {
@@ -59,7 +59,7 @@
     "title": "STAY：实习的一天",
     "summary": "学校和电信合作实习的日记：培训、词元天下、产业园走访，以及夹在杠杠里那些不太方便直接说出口的碎碎念。",
     "publishedAt": "2026-08-16",
-    "category": "日记",
+    "category": "生活",
     "source": "/content/stay.md"
   },
   {
@@ -68,7 +68,7 @@
     "title": "Core 靶机复盘：王炸方案进阶",
     "summary": "作者说这台很简单：入口致敬测试人员，切 111 复用 Bomb 提权，最后一跳是王炸方案进阶版的符号链接劫持。",
     "publishedAt": "2026-08-13",
-    "category": "复盘",
+    "category": "渗透测试",
     "source": "/content/core.md"
   },
   {
@@ -77,7 +77,7 @@
     "title": "IR2 靶机复盘：弱 RSA 后门到竞态提权",
     "summary": "ftasy 的 IR1 续作。对照作者 WP 走通弱 RSA 后门与 safeguard 竞态；复盘里如实记录了没找到 uqloads 提示、以及试 bd 误删 root flag。",
     "publishedAt": "2026-08-13",
-    "category": "复盘",
+    "category": "渗透测试",
     "source": "/content/ir2.md"
   },
   {
@@ -86,7 +86,7 @@
     "title": "Cock 靶机复盘：Cockpit RCE 到 tar 通配符提权",
     "summary": "mono 出的 Cock 靶机：从遗留台账拿到 Cockpit 弱口令，利用 CVE-2026-4802 进入 svc_vpn，再借日志明文口令切到 cock，最终用 tar 通配符 checkpoint 提到 root。",
     "publishedAt": "2026-08-10",
-    "category": "复盘",
+    "category": "渗透测试",
     "source": "/content/mono.md"
   },
   {
@@ -95,7 +95,7 @@
     "title": "Code 靶机复盘：OpenCode API 到 sudo 提权",
     "summary": "从页面注释定位 OpenCode，用弱口令打通 Session Shell API 拿到 beehack，再借 sudo 免密 opencode 拉起本机 root 服务完成提权。",
     "publishedAt": "2026-08-09",
-    "category": "复盘",
+    "category": "渗透测试",
     "source": "/content/code.md"
   },
   {
@@ -104,7 +104,7 @@
     "title": "11s 靶机复盘：Git 泄露到 PrintSpoofer 提权",
     "summary": "从 8080 端口 .git 泄露拿到用户名与默认口令线索，经 WinRM 进入后利用上传黑名单大小写绕过切到 IIS AppPool，再用 PrintSpoofer 提到 SYSTEM。",
     "publishedAt": "2026-07-27",
-    "category": "复盘",
+    "category": "渗透测试",
     "source": "/content/11s.md"
   },
   {
@@ -113,7 +113,7 @@
     "title": "恩施亲子 5 日游攻略（温州出发）",
     "summary": "温州出发、一家三口去恩施玩 5 天：住市区，两天看大峡谷和屏山，一天进腾龙洞歇脚，首尾两天只负责到达和返程。",
     "publishedAt": "2026-07-27",
-    "category": "文章",
+    "category": "生活",
     "source": "/content/enshi-family-5-day.md"
   },
   {
@@ -122,7 +122,7 @@
     "title": "Boom 靶机复盘：WordPress 漏洞到 sudo 提权",
     "summary": "从 WordPress 预认证漏洞链获得命令执行，稳定 Shell、发现 SSH 凭据，最终利用可写的免密 sudo 脚本取得 root。",
     "publishedAt": "2026-07-24",
-    "category": "复盘",
+    "category": "渗透测试",
     "source": "/content/boom.md"
   },
   {
@@ -131,7 +131,7 @@
     "title": "BadBox 靶机复盘：从 WordPress 到 Landlock 提权",
     "summary": "从 WordPress 用户枚举与弱口令进入后台，通过主题编辑器获得 Shell，再分析 BusyBox、SUID Bash 与 Landlock 的权限边界。",
     "publishedAt": "2026-07-24",
-    "category": "复盘",
+    "category": "渗透测试",
     "source": "/content/badbox.md"
   },
   {
@@ -140,7 +140,7 @@
     "title": "IR1 靶机复盘：从图片马到 root",
     "summary": "从伪装图片中分离 PHP 木马、还原 ZWCQA 编码与 WebShell 链路，并利用 safeguard 定时任务的信任边界缺陷获取 root。",
     "publishedAt": "2026-07-23",
-    "category": "复盘",
+    "category": "渗透测试",
     "source": "/content/ir1.md"
   },
   {
@@ -149,7 +149,7 @@
     "title": "SourceCode 靶机复盘：从 Webshell 到符号链接竞争提权",
     "summary": "围绕 cp -L 符号链接竞争，复盘实际通关路径、另一条旁路解法，以及作者用“八分钟拆弹”构造的题目主线。",
     "publishedAt": "2026-07-22",
-    "category": "复盘",
+    "category": "渗透测试",
     "source": "/content/sourcecode.md"
   },
   {
@@ -158,7 +158,7 @@
     "title": "HMV 靶机：Gameshell 4",
     "summary": "Gameshell 4 靶机渗透过程与关键步骤复盘。",
     "publishedAt": "2026-07-20",
-    "category": "复盘",
+    "category": "HackMyVM",
     "source": "/content/hmv-gameshell-4.pdf",
     "pages": 4
   },
@@ -168,7 +168,7 @@
     "title": "HMV 靶机：Helix",
     "summary": "Helix 靶机渗透过程、思路记录与结果整理。",
     "publishedAt": "2026-07-20",
-    "category": "复盘",
+    "category": "HackMyVM",
     "source": "/content/hmv-helix.pdf",
     "pages": 2
   },

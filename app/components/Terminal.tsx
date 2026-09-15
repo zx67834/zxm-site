@@ -34,7 +34,7 @@ export default function Terminal() {
     { type: "system", text: "  ███████╗ ██╔╝ ██╗ ██║ ╚═╝ ██║" },
     { type: "system", text: "  ╚══════╝ ╚═╝  ╚═╝ ╚═╝     ╚═╝" },
     { type: "system", text: "          zxm-site / contact shell" },
-    { type: "system", text: `Last login: ${new Date().toLocaleString("zh-CN", { hour12: false })}` },
+    { type: "system", text: "Session: local / no remote connection" },
     { type: "system", text: "Type 'help' for commands · Tab to complete · ↑↓ for history" },
   ]);
 

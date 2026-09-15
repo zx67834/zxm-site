@@ -1,6 +1,7 @@
 import Link from "next/link";
 import DocumentReader from "./DocumentReader";
 import SiteLogo from "./SiteLogo";
+import ThemeToggle from "./ThemeToggle";
 
 type DocumentPageProps = {
   kind: "markdown" | "pdf";
@@ -16,6 +17,7 @@ export default function DocumentPage({ kind, title, meta, source }: DocumentPage
       <div>
         <Link href="/articles">全部文章</Link>
         <Link href="/terminal">终端</Link>
+        <ThemeToggle />
       </div>
     </nav>
     <header className="document-header">
@@ -23,7 +25,7 @@ export default function DocumentPage({ kind, title, meta, source }: DocumentPage
         <span>{meta}</span>
         <h1>{title}</h1>
       </div>
-      <Link className="document-back" href="/articles">← 返回文章列表</Link>
+      <Link className="document-back" href="/articles"><span aria-hidden="true">←</span> 返回文章列表</Link>
     </header>
     <section className={`document-surface document-surface--${kind}`}>
       <DocumentReader kind={kind} source={source} title={title} />

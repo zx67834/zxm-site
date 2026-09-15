@@ -17,6 +17,20 @@ export default function NodeField() {
     let frame = 0;
     let pointer = { x: -999, y: -999 };
     const nodes: { x: number; y: number; vx: number; vy: number }[] = [];
+    let palette = { background: "246, 248, 247", line: "77, 124, 105", dot: "48, 109, 84" };
+
+    const readPalette = () => {
+      const styles = getComputedStyle(document.documentElement);
+      palette = {
+        background: styles.getPropertyValue("--node-bg-rgb").trim() || palette.background,
+        line: styles.getPropertyValue("--node-line-rgb").trim() || palette.line,
+        dot: styles.getPropertyValue("--node-dot-rgb").trim() || palette.dot,
+      };
+      if (width && height) {
+        ctx.fillStyle = `rgb(${palette.background})`;
+        ctx.fillRect(0, 0, width, height);
+      }
+    };
 
     const resize = () => {
       const rect = host.getBoundingClientRect();
@@ -29,7 +43,7 @@ export default function NodeField() {
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       nodes.length = 0;
-      const count = Math.min(240, Math.max(115, Math.floor((width * height) / 4800)));
+      const count = Math.min(220, Math.max(48, Math.floor((width * height) / 4800)));
       for (let i = 0; i < count; i++) {
         nodes.push({
           x: Math.random() * width,
@@ -38,6 +52,8 @@ export default function NodeField() {
           vy: (Math.random() - 0.5) * 0.22,
         });
       }
+      ctx.fillStyle = `rgb(${palette.background})`;
+      ctx.fillRect(0, 0, width, height);
     };
 
     const move = (event: PointerEvent) => {
@@ -46,7 +62,7 @@ export default function NodeField() {
     };
 
     const draw = () => {
-      ctx.fillStyle = "rgba(7, 20, 13, .28)";
+      ctx.fillStyle = `rgba(${palette.background}, .28)`;
       ctx.fillRect(0, 0, width, height);
       for (const node of nodes) {
         node.x += node.vx;
@@ -58,7 +74,7 @@ export default function NodeField() {
         for (let j = i + 1; j < nodes.length; j++) {
           const distance = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
           if (distance < 120) {
-            ctx.strokeStyle = `rgba(54, 154, 91, ${(1 - distance / 120) * 0.34})`;
+            ctx.strokeStyle = `rgba(${palette.line}, ${(1 - distance / 120) * 0.25})`;
             ctx.beginPath();
             ctx.moveTo(nodes[i].x, nodes[i].y);
             ctx.lineTo(nodes[j].x, nodes[j].y);
@@ -67,14 +83,14 @@ export default function NodeField() {
         }
         const hover = Math.hypot(nodes[i].x - pointer.x, nodes[i].y - pointer.y);
         if (hover < 155) {
-          ctx.strokeStyle = `rgba(113, 220, 150, ${(1 - hover / 155) * 0.72})`;
+          ctx.strokeStyle = `rgba(${palette.dot}, ${(1 - hover / 155) * 0.55})`;
           ctx.beginPath();
           ctx.moveTo(nodes[i].x, nodes[i].y);
           ctx.lineTo(pointer.x, pointer.y);
           ctx.stroke();
         }
       }
-      ctx.fillStyle = "rgba(103, 205, 138, .86)";
+      ctx.fillStyle = `rgba(${palette.dot}, .68)`;
       for (const node of nodes) {
         ctx.beginPath();
         ctx.arc(node.x, node.y, 2.1, 0, Math.PI * 2);
@@ -83,15 +99,19 @@ export default function NodeField() {
       frame = requestAnimationFrame(draw);
     };
 
+    readPalette();
     resize();
     draw();
     const observer = new ResizeObserver(resize);
+    const themeObserver = new MutationObserver(readPalette);
     observer.observe(host);
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     host.addEventListener("pointermove", move);
     host.addEventListener("pointerleave", () => (pointer = { x: -999, y: -999 }));
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
+      themeObserver.disconnect();
       host.removeEventListener("pointermove", move);
     };
   }, []);

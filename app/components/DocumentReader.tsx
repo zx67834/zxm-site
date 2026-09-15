@@ -1,6 +1,14 @@
 "use client";
 
-import { useEffect, useState, type KeyboardEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+  type UIEvent,
+} from "react";
 
 type DocumentReaderProps = {
   kind: "markdown" | "pdf";
@@ -70,7 +78,61 @@ function renderInline(text: string): ReactNode[] {
   return nodes;
 }
 
-function MarkdownBody({ source }: { source: string }) {
+type Heading = {
+  id: string;
+  level: number;
+  label: string;
+};
+
+function headingId(label: string, line: number) {
+  const readable = label
+    .toLowerCase()
+    .replace(/[`*_~]/g, "")
+    .replace(/[^\p{Letter}\p{Number}]+/gu, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 48);
+  return `section-${line}-${readable || "heading"}`;
+}
+
+function getHeadings(source: string): Heading[] {
+  let inCode = false;
+  return source.split(/\r?\n/).flatMap((line, index) => {
+    if (line.startsWith("```")) {
+      inCode = !inCode;
+      return [];
+    }
+    if (inCode) return [];
+    const match = line.match(/^(#{2,3})\s+(.+)$/);
+    if (!match) return [];
+    return [{ id: headingId(match[2], index), level: match[1].length, label: match[2] }];
+  });
+}
+
+function CodeBlock({ code, language }: { code: string; language: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  return <div className="markdown-code-block">
+    <div className="markdown-code-toolbar">
+      <span className="markdown-code-language">{language || "plain text"}</span>
+      <button className="markdown-copy" type="button" onClick={copy} aria-label="复制代码">
+        {copied ? "已复制" : "复制"}
+      </button>
+    </div>
+    <pre className="markdown-code"><code>{code}</code></pre>
+  </div>;
+}
+
+function MarkdownBody({ source, title }: { source: string; title: string }) {
   const lines = source.split(/\r?\n/);
   const blocks: ReactNode[] = [];
   for (let index = 0; index < lines.length; index += 1) {
@@ -83,10 +145,7 @@ function MarkdownBody({ source }: { source: string }) {
           code.push(lines[index]);
           index += 1;
         }
-        blocks.push(<pre className="markdown-code" key={`code-${index}`}>
-          {language && <span className="markdown-code-language">{language}</span>}
-          <code>{code.join("\n")}</code>
-        </pre>);
+        blocks.push(<CodeBlock code={code.join("\n")} language={language} key={`code-${index}`} />);
         continue;
       }
 
@@ -151,10 +210,13 @@ function MarkdownBody({ source }: { source: string }) {
         continue;
       }
 
-      if (line.startsWith("# ")) blocks.push(<h1 key={index}>{renderInline(line.slice(2))}</h1>);
-      else if (line.startsWith("## ")) blocks.push(<h2 key={index}>{renderInline(line.slice(3))}</h2>);
-      else if (line.startsWith("### ")) blocks.push(<h3 key={index}>{renderInline(line.slice(4))}</h3>);
-      else if (line.startsWith("#### ")) blocks.push(<h4 key={index}>{renderInline(line.slice(5))}</h4>);
+      if (line.startsWith("# ")) {
+        const heading = line.slice(2).trim();
+        if (heading !== title.trim()) blocks.push(<h1 key={index}>{renderInline(heading)}</h1>);
+      }
+      else if (line.startsWith("## ")) blocks.push(<h2 id={headingId(line.slice(3), index)} key={index}>{renderInline(line.slice(3))}</h2>);
+      else if (line.startsWith("### ")) blocks.push(<h3 id={headingId(line.slice(4), index)} key={index}>{renderInline(line.slice(4))}</h3>);
+      else if (line.startsWith("#### ")) blocks.push(<h4 id={headingId(line.slice(5), index)} key={index}>{renderInline(line.slice(5))}</h4>);
       else if (/^\d+\.\s/.test(line)) blocks.push(<li key={index}>{renderInline(line.replace(/^\d+\.\s/, ""))}</li>);
       else if (line.startsWith("- ")) blocks.push(<li key={index}>{renderInline(line.slice(2))}</li>);
       else if (line.startsWith("> ")) blocks.push(<blockquote key={index}>{renderInline(line.slice(2))}</blockquote>);
@@ -168,12 +230,40 @@ function MarkdownBody({ source }: { source: string }) {
 
 export default function DocumentReader({ kind, source, title }: DocumentReaderProps) {
   const [markdown, setMarkdown] = useState("");
+  const [loadError, setLoadError] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [activeHeading, setActiveHeading] = useState("");
+  const readerRef = useRef<HTMLDivElement>(null);
   const resolvedSource = `${process.env.NEXT_PUBLIC_BASE_PATH || ""}${source}`;
+  const headings = useMemo(() => getHeadings(markdown), [markdown]);
 
   useEffect(() => {
     if (kind !== "markdown") return;
-    fetch(resolvedSource).then(response => response.text()).then(setMarkdown);
+    const controller = new AbortController();
+    fetch(resolvedSource, { signal: controller.signal })
+      .then(response => {
+        if (!response.ok) throw new Error(`Article request failed: ${response.status}`);
+        return response.text();
+      })
+      .then(setMarkdown)
+      .catch(error => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setLoadError(true);
+      });
+    return () => controller.abort();
   }, [kind, resolvedSource]);
+
+  const updateReadingState = (event: UIEvent<HTMLDivElement>) => {
+    const reader = event.currentTarget;
+    const available = reader.scrollHeight - reader.clientHeight;
+    setProgress(available > 0 ? Math.min(1, reader.scrollTop / available) : 0);
+
+    const visibleHeadings = [...reader.querySelectorAll<HTMLElement>(".markdown-body h2, .markdown-body h3")];
+    const current = visibleHeadings.reduce<HTMLElement | null>((result, heading) => {
+      return heading.offsetTop - reader.scrollTop <= 150 ? heading : result;
+    }, null);
+    setActiveHeading(current?.id || "");
+  };
 
   if (kind === "pdf") {
     return <div className="pdf-viewport">
@@ -185,5 +275,33 @@ export default function DocumentReader({ kind, source, title }: DocumentReaderPr
     </div>;
   }
 
-  return <MarkdownBody source={markdown || "正在加载…"} />;
+  if (loadError) {
+    return <div className="article-load-state" role="alert">
+      <strong>文章加载失败</strong>
+      <button type="button" onClick={() => window.location.reload()}>重新加载</button>
+    </div>;
+  }
+
+  if (!markdown) {
+    return <div className="article-load-state" role="status">正在加载文章…</div>;
+  }
+
+  return <div className="markdown-reader" ref={readerRef} onScroll={updateReadingState}>
+    <div className="reading-progress" aria-hidden="true">
+      <i style={{ transform: `scaleX(${progress})` }} />
+    </div>
+    <div className={`markdown-layout${headings.length ? " has-toc" : ""}`}>
+      {headings.length > 0 && <aside className="article-toc" aria-label="文章目录">
+        <span>ON THIS PAGE</span>
+        <nav>
+          {headings.map(heading => <a
+            className={`${heading.level === 3 ? "is-subheading " : ""}${activeHeading === heading.id ? "is-active" : ""}`}
+            href={`#${heading.id}`}
+            key={heading.id}
+          >{heading.label}</a>)}
+        </nav>
+      </aside>}
+      <MarkdownBody source={markdown} title={title} />
+    </div>
+  </div>;
 }

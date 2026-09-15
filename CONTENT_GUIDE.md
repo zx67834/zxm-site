@@ -15,7 +15,7 @@
 - `title`：展示标题。
 - `summary`：列表与更新日志摘要。
 - `publishedAt`：发布日期，格式为 `YYYY-MM-DD`；热力图使用这个日期。
-- `category`：例如 `文章` 或 `复盘`。
+- `category`：`渗透测试`、`HackMyVM`、`春秋`、`生活` 或 `文章`。
 - `source`：以 `/content/` 开头的文件路径。
 - `pages`：PDF 可选页数。
 
