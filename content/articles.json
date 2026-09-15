@@ -1,5 +1,14 @@
 [
   {
+    "slug": "datagram-udp-aes-profiled",
+    "kind": "markdown",
+    "title": "Datagram 靶机复盘：UDP AES 挑战到 profile.d 提权",
+    "summary": "500/udp 十轮 AES-ECB 自动化拿 longly；排除 /tmp nosuid 假 SUID 后，借 666 的 profile.d 与 cron bash -l 提到 root。",
+    "publishedAt": "2026-09-15",
+    "category": "复盘",
+    "source": "/content/datagram.md"
+  },
+  {
     "slug": "mazebox-shellinabox-rc-service",
     "kind": "markdown",
     "title": "Mazebox 靶机复盘：Shellinabox 到 rc-service 提权",
