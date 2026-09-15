@@ -1,5 +1,14 @@
 [
   {
+    "slug": "litellm-cve-2026-42271-mcp-stdio",
+    "kind": "markdown",
+    "title": "CVE-2026-42271 复盘：LiteLLM 默认 Key 到 MCP stdio 无回显 RCE（春秋云镜）",
+    "summary": "春秋云镜：openapi 锁版本后用默认 master key 过鉴权，stdio 测试接口起子进程，DNS 外带并还原大小写拿到 flag。",
+    "publishedAt": "2026-09-15",
+    "category": "复盘",
+    "source": "/content/litellm-cve-2026-42271.md"
+  },
+  {
     "slug": "datagram-udp-aes-profiled",
     "kind": "markdown",
     "title": "Datagram 靶机复盘：UDP AES 挑战到 profile.d 提权",
