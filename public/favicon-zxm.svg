@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="ZXM">
+  <style>
+    .tile { fill: #f7faf8; stroke: #8bb9aa; }
+    .mark { stroke: #14221d; }
+    .accent { fill: #16866c; stroke: #16866c; }
+    @media (prefers-color-scheme: dark) {
+      .tile { fill: #0d1512; stroke: #315f51; }
+      .mark { stroke: #eef8f3; }
+      .accent { fill: #59d9ad; stroke: #59d9ad; }
+    }
+  </style>
+
+  <rect class="tile" x="5" y="5" width="54" height="54" rx="15" stroke-width="2"/>
+
+  <path class="accent" d="M14 22V14h8M42 50h8v-8" fill="none" stroke-width="2.5" stroke-linecap="square"/>
+  <circle class="accent" cx="49" cy="14" r="3.5" stroke="none"/>
+
+  <path class="mark" d="M20 22h24L20 42h24" fill="none" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter"/>
+</svg>
