@@ -194,7 +194,16 @@ function MarkdownBody({ source, title }: { source: string; title: string }) {
       }
 
       if (line.startsWith("| ") && /^\|[\s|:-]+\|$/.test(lines[index + 1] || "")) {
-        const cells = (value: string) => value.split("|").slice(1, -1).map(cell => cell.trim());
+        const cells = (value: string) => {
+          const parts: string[] = [];
+          const masked = value.replace(/\\\|/g, () => {
+            parts.push("|");
+            return `\u0000${parts.length - 1}\u0000`;
+          });
+          return masked.split("|").slice(1, -1).map(cell =>
+            cell.trim().replace(/\u0000(\d+)\u0000/g, (_, i) => parts[Number(i)])
+          );
+        };
         const header = cells(line);
         const rows: string[][] = [];
         index += 2;
