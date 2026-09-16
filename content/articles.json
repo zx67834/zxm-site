@@ -1,5 +1,14 @@
 [
   {
+    "slug": "langflow-cve-2026-33017-public-flow-rce",
+    "kind": "markdown",
+    "title": "CVE-2026-33017 复盘：Langflow auto_login 到公开 Flow RCE（春秋云镜）",
+    "summary": "春秋云镜：auto_login 拿 token，踩过 is_public 假成功后改 access_type=PUBLIC，经 build_public_tmp 自定义组件反弹到跳板机。",
+    "publishedAt": "2026-09-16",
+    "category": "春秋",
+    "source": "/content/langflow-cve-2026-33017.md"
+  },
+  {
     "slug": "litellm-cve-2026-42271-mcp-stdio",
     "kind": "markdown",
     "title": "CVE-2026-42271 复盘：LiteLLM 默认 Key 到 MCP stdio 无回显 RCE（春秋云镜）",
