@@ -1,5 +1,14 @@
 [
   {
+    "slug": "gogs-cve-2025-64111-symlink-rce",
+    "kind": "markdown",
+    "title": "CVE-2025-64111 复盘：Gogs 软链写穿 .git/config 到 RCE（春秋云镜）",
+    "summary": "春秋云镜：题目账密建仓后植入指向 .git 的软链，经 Contents API 污染 core.fsmonitor，拿到容器内 git 与 flag。",
+    "publishedAt": "2026-09-17",
+    "category": "春秋",
+    "source": "/content/gogs-cve-2025-64111.md"
+  },
+  {
     "slug": "langflow-cve-2026-33017-public-flow-rce",
     "kind": "markdown",
     "title": "CVE-2026-33017 复盘：Langflow auto_login 到公开 Flow RCE（春秋云镜）",
