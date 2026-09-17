@@ -10,8 +10,8 @@
 | 开放端口 | TCP 22（SSH）；UDP 500（自定义 AES 挑战，伪装 isakmp） |
 | 最终路径 | UDP 十轮 AES-128-ECB → `longly` → 666 的 `profile.d` + cron `bash -l` → root |
 
-![环境](/content/datagram/image-01.png)
-![主机发现](/content/datagram/image-02.png)
+![环境](/content/datagram/image-01.webp)
+![主机发现](/content/datagram/image-02.webp)
 
 ## 1. 攻击链概览
 
@@ -29,8 +29,8 @@ nmap：TCP 仅 22；UDP 500 伪 ISAKMP
 
 ## 2. 侦察：TCP 很少，看 UDP
 
-![TCP 扫描](/content/datagram/image-03.png)
-![UDP 500](/content/datagram/image-04.png)
+![TCP 扫描](/content/datagram/image-03.webp)
+![UDP 500](/content/datagram/image-04.webp)
 
 | 端口 | 协议 | 备注 |
 |------|------|------|
@@ -138,7 +138,7 @@ dead_ports[ip] = port                  # 按 (ip, port) 拉黑
 
 脚本每次新建 socket（随机源端口）才能反复试错格式；排错过程里还有 `test_formats.py` 一类穷举器，用来证明「不是答案格式的问题」。
 
-![挑战求解 / SSH](/content/datagram/image-05.png)
+![挑战求解 / SSH](/content/datagram/image-05.webp)
 
 ```bash
 ssh longly@192.168.134.73   # Ym0C1T05
@@ -159,9 +159,9 @@ cat ~/user.txt
 | 本地监听 | 仍只有 22 / 500 一类，无隐藏服务 |
 | 喷 root SSH | 弱口令未命中（非预期） |
 
-![可写 profile.d](/content/datagram/image-06.png)
-![枚举补充](/content/datagram/image-07.png)
-![nosuid / 其它排除](/content/datagram/image-08.png)
+![可写 profile.d](/content/datagram/image-06.webp)
+![枚举补充](/content/datagram/image-07.webp)
+![nosuid / 其它排除](/content/datagram/image-08.webp)
 
 ## 5. 真链：666 的 profile.d + cron `bash -l`
 
@@ -206,8 +206,8 @@ echo 'root:Pwn3d!2026' | chpasswd
 
 一分钟后即可 `su` / SSH 进 root：
 
-![写入后的 10-demo.sh / 提权](/content/datagram/image-09.png)
-![root flag](/content/datagram/image-10.png)
+![写入后的 10-demo.sh / 提权](/content/datagram/image-09.webp)
+![root flag](/content/datagram/image-10.webp)
 
 ```text
 flag{root-d178386de0eab898132c8050efffd30d}

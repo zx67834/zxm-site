@@ -3,7 +3,7 @@
 > 靶机地址：`192.168.134.59`
 > Kali 地址：`192.168.134.4`
 
-![IR1 靶机首页](/content/ir1/image-01.png)
+![IR1 靶机首页](/content/ir1/image-01.webp)
 
 ## 一、初始枚举
 
@@ -12,8 +12,8 @@
 | 22/tcp | open | SSH | OpenSSH 10.3 |
 | 80/tcp | open | HTTP | Apache httpd 2.4.68 (Unix) + PHP 8.3.32 |
 
-![端口扫描结果](/content/ir1/image-02.png)
-![目录枚举结果](/content/ir1/image-03.png)
+![端口扫描结果](/content/ir1/image-02.webp)
+![目录枚举结果](/content/ir1/image-03.webp)
 
 ```bash
 gobuster dir -u http://192.168.134.59/ -w /usr/share/wordlists/dirb/common.txt
@@ -29,19 +29,19 @@ gobuster dir -u http://192.168.134.59/ -w /usr/share/wordlists/dirb/common.txt
 
 80 端口的页面中有一张异常图片。后续从图片中分离出的代码与目录浏览发现的 `ZWCQA.php` 相互对应，因此这里不是普通静态资源，而是本题的关键线索。
 
-![HTTP 页面异常图片](/content/ir1/image-04.png)
-![上传目录线索](/content/ir1/image-05.png)
+![HTTP 页面异常图片](/content/ir1/image-04.webp)
+![上传目录线索](/content/ir1/image-05.webp)
 
 ## 二、从图片中分离 PHP 源码
 
 `strings` 可以确认图片内存在 `<?php`；再定位该字符串的字节偏移，从偏移位置切出文件尾部，即可得到追加在 PNG 后的 PHP 代码。
 
-![图片马字符串分析](/content/ir1/image-06.png)
-![PHP 源码分离过程](/content/ir1/image-07.png)
+![图片马字符串分析](/content/ir1/image-06.webp)
+![PHP 源码分离过程](/content/ir1/image-07.webp)
 
 这并非传统意义上的像素隐写，而是将脚本直接追加在图片文件中。分离出的代码包含 `ZWCQA` 函数和动态执行点，也与前面目录中暴露的 `ZWCQA.php` 对应。
 
-![ZWCQA 代码分析](/content/ir1/image-08.png)
+![ZWCQA 代码分析](/content/ir1/image-08.webp)
 
 ## 三、ZWCQA 解密函数分析
 
@@ -99,16 +99,16 @@ def zwcqa_encrypt(payload, prefix="gw"):
 
 按照上述规则编码请求参数后，二阶段脚本成功解码并执行。返回的 `uid=101(apache)` 表明这里获得的是 Web 服务账户的命令执行上下文，而不是系统高权限。
 
-![编码请求参数](/content/ir1/image-09.png)
-![Web 执行上下文验证](/content/ir1/image-10.png)
+![编码请求参数](/content/ir1/image-09.webp)
+![Web 执行上下文验证](/content/ir1/image-10.webp)
 
 ## 五、日志泄露与 IR1 用户
 
 拿到 Web 执行上下文后，唯一可读的 Web 日志。(靶机设计里作者引导的不错)
 `/var/log/scan.log` 实际上记录了攻击者此前的扫描、凭据获取、后门落地和清理痕迹。
 
-![扫描日志泄露](/content/ir1/image-11.png)
-![日志中的攻击链线索](/content/ir1/image-12.png)
+![扫描日志泄露](/content/ir1/image-11.webp)
+![日志中的攻击链线索](/content/ir1/image-12.webp)
 
 其中与后续链路直接相关的内容如下：
 
@@ -130,13 +130,13 @@ def zwcqa_encrypt(payload, prefix="gw"):
 
 使用 `IR1:hunter123` 成功登录后，身份从 Web 服务账户切换到普通系统用户。
 
-![IR1 用户登录](/content/ir1/image-13.png)
+![IR1 用户登录](/content/ir1/image-13.webp)
 
 ## 六、Safeguard 定时任务与 root
 
 随后发现 `safeguard.sh`。它以 root 身份定时执行，把 `/home/IR1` 的内容递归复制到 `/root`，等待 15 秒后再清理非保留文件。
 
-![Safeguard 定时任务](/content/ir1/image-14.png)
+![Safeguard 定时任务](/content/ir1/image-14.webp)
 
 ```bash
 #!/bin/bash
@@ -165,7 +165,7 @@ done
 
 本题利用的是复制与清理之间的窗口：将 SSH 公钥置于 IR1 家目录的 `.ssh/authorized_keys`，等待脚本复制到 `/root/.ssh/`，再在窗口期内以 root 认证。若没有固定等待时间，这会更接近竞争条件，需要围绕文件复制和清理的时序进行验证。
 
-![root 权限获取](/content/ir1/image-15.png)
+![root 权限获取](/content/ir1/image-15.webp)
 
 ## 七、作者设计思路与背景补充
 

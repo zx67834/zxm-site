@@ -15,8 +15,10 @@ export default function NodeField() {
     let width = 0;
     let height = 0;
     let frame = 0;
+    let running = false;
     let pointer = { x: -999, y: -999 };
     const nodes: { x: number; y: number; vx: number; vy: number }[] = [];
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     let palette = { background: "246, 248, 247", line: "77, 124, 105", dot: "48, 109, 84" };
 
     const readPalette = () => {
@@ -43,7 +45,11 @@ export default function NodeField() {
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       nodes.length = 0;
-      const count = Math.min(220, Math.max(48, Math.floor((width * height) / 4800)));
+      const mobile = width < 720;
+      const count = Math.min(
+        mobile ? 64 : 168,
+        Math.max(mobile ? 34 : 48, Math.floor((width * height) / (mobile ? 9000 : 6200))),
+      );
       for (let i = 0; i < count; i++) {
         nodes.push({
           x: Math.random() * width,
@@ -62,11 +68,14 @@ export default function NodeField() {
     };
 
     const draw = () => {
+      if (!running) return;
       ctx.fillStyle = `rgba(${palette.background}, .28)`;
       ctx.fillRect(0, 0, width, height);
       for (const node of nodes) {
-        node.x += node.vx;
-        node.y += node.vy;
+        if (!motionQuery.matches) {
+          node.x += node.vx;
+          node.y += node.vy;
+        }
         if (node.x < 5 || node.x > width - 5) node.vx *= -1;
         if (node.y < 5 || node.y > height - 5) node.vy *= -1;
       }
@@ -96,23 +105,48 @@ export default function NodeField() {
         ctx.arc(node.x, node.y, 2.1, 0, Math.PI * 2);
         ctx.fill();
       }
-      frame = requestAnimationFrame(draw);
+      if (!motionQuery.matches && !document.hidden) frame = requestAnimationFrame(draw);
+      else running = false;
     };
+
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(frame);
+    };
+
+    const start = () => {
+      stop();
+      running = true;
+      draw();
+    };
+
+    const onVisibilityChange = () => document.hidden ? stop() : start();
+    const onMotionChange = () => start();
 
     readPalette();
     resize();
-    draw();
-    const observer = new ResizeObserver(resize);
-    const themeObserver = new MutationObserver(readPalette);
+    start();
+    const observer = new ResizeObserver(() => {
+      resize();
+      start();
+    });
+    const themeObserver = new MutationObserver(() => {
+      readPalette();
+      start();
+    });
     observer.observe(host);
     themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     host.addEventListener("pointermove", move);
     host.addEventListener("pointerleave", () => (pointer = { x: -999, y: -999 }));
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    motionQuery.addEventListener("change", onMotionChange);
     return () => {
-      cancelAnimationFrame(frame);
+      stop();
       observer.disconnect();
       themeObserver.disconnect();
       host.removeEventListener("pointermove", move);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      motionQuery.removeEventListener("change", onMotionChange);
     };
   }, []);
 

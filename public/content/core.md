@@ -10,7 +10,7 @@
 | Web | Apache 2.4.67，MazeSec 静态展示页 |
 | 最终路径 | HTML 注释泄露 SSH 口令 → 替换 `12138.sh` 到用户 111 → 符号链接劫持 `111.sh` → root |
 
-![靶机启动与环境信息](/content/core/image-01.png) ![主机发现 / 目标确认](/content/core/image-02.png)
+![靶机启动与环境信息](/content/core/image-01.webp) ![主机发现 / 目标确认](/content/core/image-02.webp)
 
 ## 1. 攻击链概览
 
@@ -35,11 +35,11 @@ nmap -sT -sV -sC -O -p- 192.168.134.67
 
 只开放 SSH 与 HTTP。主机名 `Core`，系统 Alpine。
 
-![端口扫描确认 22 与 80](/content/core/image-03.png)
+![端口扫描确认 22 与 80](/content/core/image-03.webp)
 
 80 端口是 MazeSec 团队展示页——作者说入口就是为了致敬测试人员，所以页面上直接放了测试成员。目录扫描没有额外可写入口；`/cgi-bin/printenv` 能看到源码，但 shebang 被注释，不是主线。
 
-![80 端口 MazeSec 首页](/content/core/image-04.png)
+![80 端口 MazeSec 首页](/content/core/image-04.webp)
 
 看源码时，成员 `ll104567` 的卡片旁有一段无属性 HTML 注释：
 
@@ -47,7 +47,7 @@ nmap -sT -sV -sC -O -p- 192.168.134.67
 <!-- WJBCDJ1k36gYWKs9GjkS -->
 ```
 
-![源码注释泄露 20 位口令](/content/core/image-05.png)
+![源码注释泄露 20 位口令](/content/core/image-05.webp)
 
 直接拿去试 SSH：
 
@@ -62,7 +62,7 @@ ssh ll104567@192.168.134.67
 flag{user-10ccf8c4b05e437def737342f1d9b33f}
 ```
 
-![SSH 登录 ll104567 并拿 user flag](/content/core/image-06.png)
+![SSH 登录 ll104567 并拿 user flag](/content/core/image-06.webp)
 
 ## 3. 提权第一级：ll104567 → 111（Bomb 同款）
 
@@ -120,7 +120,7 @@ sudo -u 111 /home/ll104567/12138.sh
 flag{root-dfb18999777ea8a3177050c859c98c04}
 ```
 
-![两级 sudo 提权成功](/content/core/image-07.png)
+![两级 sudo 提权成功](/content/core/image-07.webp)
 
 本机 `/tmp` 是 nosuid，SUID bash 方案不可靠；更稳的是直接写 root 公钥：
 
@@ -129,7 +129,7 @@ flag{root-dfb18999777ea8a3177050c859c98c04}
 ssh -i id_ed25519 root@192.168.134.67
 ```
 
-![写入 root 公钥获得稳定 Shell](/content/core/image-08.png)
+![写入 root 公钥获得稳定 Shell](/content/core/image-08.webp)
 
 复现结束后应还原：删掉符号链接、恢复 `/home/111/111`、还原 `12138.sh`、清理 payload。
 

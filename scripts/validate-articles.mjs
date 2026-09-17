@@ -29,7 +29,20 @@ for (const [index, article] of articles.entries()) {
 
   if (article.source?.startsWith("/")) {
     try {
-      await access(resolve(root, "public", article.source.slice(1)));
+      const articlePath = resolve(root, "public", article.source.slice(1));
+      await access(articlePath);
+      if (article.kind === "markdown") {
+        const markdown = await readFile(articlePath, "utf8");
+        const localAssets = [...markdown.matchAll(/!\[[^\]]*\]\((?:<)?(\/content\/[^)>]+)(?:>)?\)/g)]
+          .map(match => match[1]);
+        for (const asset of localAssets) {
+          try {
+            await access(resolve(root, "public", asset.slice(1)));
+          } catch {
+            errors.push(`${article.slug} 找不到文章资源：public${asset}`);
+          }
+        }
+      }
     } catch {
       errors.push(`${article.slug} 找不到文件：public${article.source}`);
     }

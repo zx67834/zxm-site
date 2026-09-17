@@ -13,6 +13,7 @@
     "start": "vinext start",
     "test": "npm run build && node --test tests/rendered-html.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
+    "images:optimize": "node scripts/optimize-images.mjs",
     "snapshot:contributions": "node scripts/fetch-contributions.mjs",
     "db:generate": "drizzle-kit generate"
   },

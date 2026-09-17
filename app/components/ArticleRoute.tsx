@@ -1,15 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { articles, getArticleMeta } from "../data/articles";
 import DocumentPage from "./DocumentPage";
 
 export default function ArticleRoute() {
-  const [slug, setSlug] = useState<string | null>(null);
-
-  useEffect(() => {
-    setSlug(new URLSearchParams(window.location.search).get("slug") || "");
-  }, []);
+  const slug = useSyncExternalStore(
+    callback => {
+      window.addEventListener("popstate", callback);
+      return () => window.removeEventListener("popstate", callback);
+    },
+    () => new URLSearchParams(window.location.search).get("slug") || "",
+    () => null,
+  );
 
   const article = slug ? articles.find(item => item.slug === slug) : undefined;
 

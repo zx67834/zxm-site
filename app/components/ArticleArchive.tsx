@@ -1,22 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import { ArticleCard, ArticleGroups } from "./ArticleLibrary";
 import { articleCategories, articles, groupArticlesByCategory } from "../data/articles";
 
 export default function ArticleArchive() {
-  const [category, setCategory] = useState("");
-
-  useEffect(() => {
-    const next = new URLSearchParams(window.location.search).get("category") || "";
-    setCategory(next);
-  }, []);
+  const category = useSyncExternalStore(
+    callback => {
+      window.addEventListener("popstate", callback);
+      window.addEventListener("archive-filter-change", callback);
+      return () => {
+        window.removeEventListener("popstate", callback);
+        window.removeEventListener("archive-filter-change", callback);
+      };
+    },
+    () => new URLSearchParams(window.location.search).get("category") || "",
+    () => "",
+  );
 
   const select = (next: string) => {
-    setCategory(next);
     const url = next ? `/articles/archive/?category=${encodeURIComponent(next)}` : "/articles/archive/";
     window.history.replaceState(null, "", url);
+    window.dispatchEvent(new Event("archive-filter-change"));
   };
 
   const filtered = useMemo(

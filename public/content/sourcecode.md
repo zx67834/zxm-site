@@ -6,8 +6,8 @@
 
 靶机 IP：`192.168.134.58`  
 Kali 地址：`192.168.134.4`
-![Nmap 扫描前的目标信息](/content/sourcecode/target-info.png)
-![靶机首页](/content/sourcecode/homepage.png)
+![Nmap 扫描前的目标信息](/content/sourcecode/target-info.webp)
+![靶机首页](/content/sourcecode/homepage.webp)
 
 ## 2. 信息收集
 
@@ -17,8 +17,8 @@ PORT   STATE SERVICE VERSION
 22/tcp open  ssh     OpenSSH 10.0p2 Debian 7+deb13u4
 80/tcp open  http    Apache httpd 2.4.67 (Debian)
 ```
-![Nmap 扫描结果](/content/sourcecode/nmap.png)
-![Web 服务首页](/content/sourcecode/web-home.png)
+![Nmap 扫描结果](/content/sourcecode/nmap.webp)
+![Web 服务首页](/content/sourcecode/web-home.webp)
 
 继续做 Web 目录枚举：
 
@@ -27,26 +27,26 @@ PORT   STATE SERVICE VERSION
 200    29B   http://192.168.134.25/shell.php
 200  2682B   http://192.168.134.25/index.html
 ```
-![目录扫描结果](/content/sourcecode/directory-scan.png)
+![目录扫描结果](/content/sourcecode/directory-scan.webp)
 
 这里出现了 `login.php` 和 `shell.php` 两个关键页面。首页中的线索可以拿到登录凭据；登录后需要继续确认 `shell.php` 是否只是展示页，还是存在命令执行能力。
 
 ## 3. 初始访问：Web 登录到低权限 shell
-![登录页面或凭据线索](/content/sourcecode/login-clue.png)
-![登录后的页面](/content/sourcecode/login.png)
-![命令执行验证](/content/sourcecode/rce.png)
-![初始 shell](/content/sourcecode/shell.png)
-![权限与本地用户枚举](/content/sourcecode/enum.png)
-![定时任务线索](/content/sourcecode/timer-clue.png)
+![登录页面或凭据线索](/content/sourcecode/login-clue.webp)
+![登录后的页面](/content/sourcecode/login.webp)
+![命令执行验证](/content/sourcecode/rce.webp)
+![初始 shell](/content/sourcecode/shell.webp)
+![权限与本地用户枚举](/content/sourcecode/enum.webp)
+![定时任务线索](/content/sourcecode/timer-clue.webp)
 
 此时已经确认可以命令执行，身份是低权限 Web 用户。枚举时发现存在定时任务，这是后续提权的核心线索。
 
 为了便于后续交互与等待竞态窗口，需要获得更稳定的 shell：
-![升级交互式 shell](/content/sourcecode/tty.png)
+![升级交互式 shell](/content/sourcecode/tty.webp)
 ## 4. 提权点：root 定时任务 `boob.sh`
 
 `boob.sh` 会先清空 `huazai` 的家目录，随后把 `/opt/backup/` 中的内容复制回去：
-![boob 定时任务](/content/sourcecode/boob-script.png)
+![boob 定时任务](/content/sourcecode/boob-script.webp)
 
 危险点在 `cp -La`：`-L` 会跟随符号链接，而脚本又以 root 身份执行。脚本先删除攻击者可控目录里的文件，再复制文件，两个动作之间就产生了可以反复抢占的时间窗口。
 
@@ -60,7 +60,7 @@ cp -La /opt/backup/user.txt /home/huazai/user.txt
 
 在 `huazai` 可写的家目录中持续将 `user.txt` 重建为指向 `/opt/boob.sh` 的符号链接。每次定时任务先删掉这个链接后，竞争循环会尝试立刻补回；一旦 root 执行复制时链接仍存在，`cp -L` 就会沿链接把备份内容写入 `/opt/boob.sh`，从而改变它的 MD5。
 
-![竞争循环与后台运行状态](/content/sourcecode/race.png)
+![竞争循环与后台运行状态](/content/sourcecode/race.webp)
 
 这条路径的优点是很直观：源文件与目标文件名都明确是 `user.txt`，可以直接把竞争点锁定在最后一次 `cp` 上。
 
@@ -87,7 +87,7 @@ cp -La /opt/backup/.* /home/huazai/
 
 `boob.sh` 被改写后，另一个定时检查脚本发现 MD5 不一致，并创建了 UID 为 0 的账户。最终以该账户获得 root：
 
-![获取 root 的证据](/content/sourcecode/root.png)
+![获取 root 的证据](/content/sourcecode/root.webp)
 
 ## 8. 这题的收获
 

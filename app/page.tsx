@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import NodeField from "./components/NodeField";
 import SiteClock from "./components/SiteClock";
 import SiteLogo from "./components/SiteLogo";
@@ -15,9 +15,18 @@ const phrases = [
   "Code · Design · Write.",
 ];
 
+const heatCategoryClass: Record<string, string> = {
+  "渗透测试": "heat-category-pentest",
+  HackMyVM: "heat-category-hackmyvm",
+  "春秋": "heat-category-spring",
+  "生活": "heat-category-life",
+  "文章": "heat-category-article",
+};
+
 export default function Home() {
   const [typed, setTyped] = useState("");
   const [phrase, setPhrase] = useState(0);
+  const heatmapBoardRef = useRef<HTMLDivElement>(null);
 
   const dates = useMemo(() => Array.from({ length: 365 }, (_, index) => {
     const day = new Date();
@@ -31,10 +40,10 @@ export default function Home() {
   }, {}), []);
   const leadingEmpty = new Date(`${dates[0]}T00:00:00`).getDay();
   const calendarCells: (string | null)[] = [...Array.from({ length: leadingEmpty }, () => null), ...dates];
-  const monthLabels = dates
-    .filter((date, index) => index === 0 || date.slice(5, 7) !== dates[index - 1].slice(5, 7))
-    .map(date => ({ label: `${Number(date.slice(5, 7))}月`, week: Math.floor((leadingEmpty + dates.indexOf(date)) / 7) }));
   const updateTotal = siteUpdates.reduce((sum, item) => sum + item.count, 0);
+  const activeDayCount = dates.reduce((sum, date) => sum + (updateMap[date] ? 1 : 0), 0);
+  const rangeLabel = `${dates[0].slice(0, 7).replace("-", ".")} — ${dates[dates.length - 1].slice(0, 7).replace("-", ".")}`;
+  const latestUpdate = siteUpdates.reduce((latest, item) => item.date > latest ? item.date : latest, "").replaceAll("-", ".");
 
   useEffect(() => {
     let index = 0;
@@ -49,6 +58,15 @@ export default function Home() {
     }, 65);
     return () => window.clearInterval(timer);
   }, [phrase]);
+
+  useEffect(() => {
+    const board = heatmapBoardRef.current;
+    if (!board || !window.matchMedia("(max-width: 720px)").matches) return;
+    const frame = window.requestAnimationFrame(() => {
+      board.scrollLeft = board.scrollWidth;
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   return <main className="preview">
     <section className="preview-stage" id="top">
@@ -91,28 +109,44 @@ export default function Home() {
       <div className="section-heading"><h2 className="section-label">02 / WRITING LOG</h2><span className="section-note">文章与复盘的记录</span></div>
       <div className="writing-panel">
         <header className="writing-summary">
-          <div><strong>{String(updateTotal).padStart(2, "0")}</strong><span>篇记录<br />过去 365 天</span></div>
-          <p>没写就不亮。这张表很诚实，不装连续打卡。</p>
-          <span className="heat-legend">少{[0, 1, 2, 3, 4].map(level => <i key={level} className={`level-${level}`} />)}多</span>
+          <span className="writing-kicker">YEAR IN WRITING · 365 DAYS</span>
+          <h3>把写过的，留在时间里。</h3>
+          <p><strong>{updateTotal}</strong> 篇记录，散落在 <strong>{activeDayCount}</strong> 个创作日里。</p>
         </header>
         <div className="heatmap-stage">
-          <div className="contribution-board">
-            <div className="weekday-labels" aria-hidden="true"><span /><span /><span>一</span><span /><span>三</span><span /><span>五</span><span /></div>
+          <p className="sr-only">过去 365 天共记录 {updateTotal} 次文章更新。</p>
+          <div className="heatmap-range" aria-hidden="true">
+            <span>{rangeLabel}</span>
+            <span>ONE SQUARE · ONE DAY</span>
+          </div>
+          <div className="contribution-board" ref={heatmapBoardRef}>
             <div className="contribution-grid-wrap">
-              <div className="month-labels" aria-hidden="true">
-                {monthLabels.map(month => <span key={`${month.label}-${month.week}`} style={{ gridColumn: month.week + 1 }}>{month.label}</span>)}
-              </div>
-              <div className="heatmap">
+              <div className="heatmap" aria-hidden="true">
                 {calendarCells.map((date, index) => {
                   if (!date) return <i key={`empty-${index}`} className="heat-empty" />;
                   const value = updateMap[date] || 0;
                   const level = value >= 4 ? 4 : value;
-                  const notes = siteUpdates.filter(item => item.date === date).map(item => item.label);
-                  return <i key={date} className={`level-${level}`} title={`${date}: ${notes.join(" / ") || "无更新"}`} />;
+                  const updates = siteUpdates.filter(item => item.date === date);
+                  const notes = updates.map(item => item.label);
+                  const categories = [...new Set(updates.map(item => item.type))];
+                  const categoryClass = categories.length > 1 ? "heat-category-mixed" : heatCategoryClass[categories[0]] || "";
+                  const today = date === dates[dates.length - 1] ? " is-today" : "";
+                  return <i key={date} className={`level-${level} ${categoryClass}${today}`} title={`${date}: ${notes.join(" / ") || "无更新"}`} />;
                 })}
               </div>
             </div>
           </div>
+          <div className="heatmap-meta" aria-hidden="true">
+            <div className="heatmap-categories">
+              <span><i className="heat-category-pentest" />渗透测试</span>
+              <span><i className="heat-category-hackmyvm" />HackMyVM</span>
+              <span><i className="heat-category-spring" />春秋</span>
+              <span><i className="heat-category-life" />生活</span>
+              <span><i className="heat-category-article" />文章</span>
+            </div>
+            <span className="heatmap-latest"><i />最近更新 {latestUpdate}</span>
+          </div>
+          <span className="heatmap-scroll-hint" aria-hidden="true">左右滑动查看全年 <i>↔</i></span>
         </div>
         <div className="writing-recent-head"><span>RECENT ACTIVITY</span><Link href="/articles">查看全部文章<i className="writing-arrow" aria-hidden="true" /></Link></div>
         <ol className="writing-recent">

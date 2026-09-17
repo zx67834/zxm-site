@@ -132,7 +132,7 @@ function CodeBlock({ code, language }: { code: string; language: string }) {
   </div>;
 }
 
-function MarkdownBody({ source, title }: { source: string; title: string }) {
+function MarkdownBody({ source }: { source: string }) {
   const lines = source.split(/\r?\n/);
   const blocks: ReactNode[] = [];
   for (let index = 0; index < lines.length; index += 1) {
@@ -219,10 +219,10 @@ function MarkdownBody({ source, title }: { source: string; title: string }) {
         continue;
       }
 
-      if (line.startsWith("# ")) {
-        const heading = line.slice(2).trim();
-        if (heading !== title.trim()) blocks.push(<h1 key={index}>{renderInline(heading)}</h1>);
-      }
+      // The document shell already renders the article title. Markdown files keep
+      // their H1 for portability, but repeating it inside the reader wastes the
+      // first screen and is especially noticeable on phones.
+      if (line.startsWith("# ")) continue;
       else if (line.startsWith("## ")) blocks.push(<h2 id={headingId(line.slice(3), index)} key={index}>{renderInline(line.slice(3))}</h2>);
       else if (line.startsWith("### ")) blocks.push(<h3 id={headingId(line.slice(4), index)} key={index}>{renderInline(line.slice(4))}</h3>);
       else if (line.startsWith("#### ")) blocks.push(<h4 id={headingId(line.slice(5), index)} key={index}>{renderInline(line.slice(5))}</h4>);
@@ -300,6 +300,16 @@ export default function DocumentReader({ kind, source, title }: DocumentReaderPr
       <i style={{ transform: `scaleX(${progress})` }} />
     </div>
     <div className={`markdown-layout${headings.length ? " has-toc" : ""}`}>
+      {headings.length > 0 && <details className="article-toc-mobile">
+        <summary>文章目录 <span>{String(headings.length).padStart(2, "0")}</span></summary>
+        <nav aria-label="文章目录">
+          {headings.map(heading => <a
+            className={heading.level === 3 ? "is-subheading" : ""}
+            href={`#${heading.id}`}
+            key={`mobile-${heading.id}`}
+          >{heading.label}</a>)}
+        </nav>
+      </details>}
       {headings.length > 0 && <aside className="article-toc" aria-label="文章目录">
         <span>ON THIS PAGE</span>
         <nav>
@@ -310,7 +320,7 @@ export default function DocumentReader({ kind, source, title }: DocumentReaderPr
           >{heading.label}</a>)}
         </nav>
       </aside>}
-      <MarkdownBody source={markdown} title={title} />
+      <MarkdownBody source={markdown} />
     </div>
   </div>;
 }

