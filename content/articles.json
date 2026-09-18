@@ -1,5 +1,14 @@
 [
   {
+    "slug": "rivulet-fastjson-k8s-domain",
+    "kind": "markdown",
+    "title": "Rivulet 复盘：从 Fastjson 容器 RCE 到 K8s 集群失守与域控接管",
+    "summary": "春秋云镜：Fastjson 进容器，kubelet 偷 CA 拿宿主机；内网 SQLi/AES 捞出 test，MS17-010 打域控，再以域管回打成员机。",
+    "publishedAt": "2026-09-18",
+    "category": "春秋",
+    "source": "/content/rivulet.md"
+  },
+  {
     "slug": "gogs-cve-2025-64111-symlink-rce",
     "kind": "markdown",
     "title": "CVE-2025-64111 复盘：Gogs 软链写穿 .git/config 到 RCE（春秋云镜）",
