@@ -1,5 +1,14 @@
 [
   {
+    "slug": "blackmaze-shiro-intranet-triad",
+    "kind": "markdown",
+    "title": "BlackMaze 复盘：Shiro 任意读到内网三机（春秋云镜）",
+    "summary": "春秋云镜：/file/download 拖 jar 拿 Shiro GCM 密钥，SUID base64 出 flag1；SOCKS 进内网后 WS token 注入打 Redis，再跨机上传 ThinkPHP，时间种子 SUID 拿 flag4。",
+    "publishedAt": "2026-09-20",
+    "category": "春秋",
+    "source": "/content/blackmaze.md"
+  },
+  {
     "slug": "firebird-adcs-esc7-dcsync",
     "kind": "markdown",
     "title": "Firebird 域控入门复盘：LDAP 凭据到 ADCS ESC7",
