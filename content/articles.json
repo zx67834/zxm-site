@@ -1,5 +1,14 @@
 [
   {
+    "slug": "firebird-adcs-esc7-dcsync",
+    "kind": "markdown",
+    "title": "Firebird 域控入门复盘：LDAP 凭据到 ADCS ESC7",
+    "summary": "kaada 域控入门：LDAP info 出 111，DB_Vault 出 sublarge 哈希；CertManagers 打 ESC7 自批管理员证书后 DCSync，拿双 flag。",
+    "publishedAt": "2026-09-20",
+    "category": "渗透测试",
+    "source": "/content/firebird.md"
+  },
+  {
     "slug": "rivulet-fastjson-k8s-domain",
     "kind": "markdown",
     "title": "Rivulet 复盘：从 Fastjson 容器 RCE 到 K8s 集群失守与域控接管",
