@@ -1,5 +1,15 @@
 [
   {
+    "slug": "resonate-ssti-sudo-tree",
+    "kind": "pdf",
+    "title": "Resonate 靶机复盘：双入口 SSTI 到双路径提权",
+    "summary": "Sublarge：爆破登录或目录扫描进 SSTI，提权走口令复用 + sudo tree，或不横向换 Apache modules。",
+    "publishedAt": "2026-09-21",
+    "category": "渗透测试",
+    "source": "/content/resonate.pdf",
+    "pages": 11
+  },
+  {
     "slug": "blackmaze-shiro-intranet-triad",
     "kind": "markdown",
     "title": "BlackMaze 复盘：Shiro 任意读到内网三机（春秋云镜）",
