@@ -3,7 +3,7 @@
     "slug": "ddos-log-flood-sudo-ab",
     "kind": "markdown",
     "title": "DDos 靶机复盘：刷爆日志接口到 sudo ab 外带 root flag",
-    "summary": "群主靶机：while true 刷 /api/create_log 打满磁盘，RESOURCE_EXHAUSTED 报错送出用户名，rockyou 爆 1 端口 SSH；提权借 NOPASSWD 的 ab -p 把 /root/root.txt POST 到 nc。",
+    "summary": "群主靶机：while true 刷 /api/create_log 打满磁盘，RESOURCE_EXHAUSTED 报错给出用户名，rockyou 爆 1 端口 SSH；提权借 NOPASSWD 的 ab -p 把 /root/root.txt POST 到 nc。",
     "publishedAt": "2026-10-08",
     "category": "渗透测试",
     "source": "/content/ddos-log-flood-sudo-ab.md"

@@ -6,14 +6,14 @@
 |------|----------|
 | 靶机 | DDos（群主自建靶机） |
 | 目标地址 | 192.168.134.77（SSH 在 1/tcp，HTTP 在 5000/tcp；Kali `192.168.134.4`） |
-| 关键入口 | `POST /api/create_log` 无上限写文件，刷满磁盘逼出 `RESOURCE_EXHAUSTED` 报错 |
+| 关键入口 | `POST /api/create_log` 无上限写文件，刷满磁盘触发 `RESOURCE_EXHAUSTED` 报错 |
 | 最终路径 | 报错泄露用户名 → rockyou 爆破 SSH → `sudo ab -p` 外带 `/root/root.txt` |
 
 ![nmap 全端口扫描](/content/ddos-log-flood-sudo-ab/image-01.webp)
 
 ## 1. 攻击链概览
 
-这台靶机名字就叫 DDos，攻击思路也确实反常规：**DoS 不是目的，是逼服务在报错里把管理员账号吐出来**。磁盘打满后 `create_log` 开始返回带 `admin_contact` 的错误详情，用户名到手，剩下的就是爆破和一个很冷的 sudo 提权点。
+这台靶机名字就叫 DDos，DoS 是主线操作：把 `/api/create_log` 刷到磁盘写满，接口进入报错分支，`RESOURCE_EXHAUSTED` 的 `details` 字段里给出了管理员用户名。用户名到手，剩下的就是 SSH 爆破和一个冷门的 sudo 提权点。
 
 ```text
 nmap：1/tcp SSH，5000/tcp Werkzeug（JSON 自述文档）
@@ -68,7 +68,7 @@ quote    [Status: 200, Size: 137, Words: 14, Lines: 2, Duration: 942ms]
 
 从现象看 `quote` 更像烟雾弹：除了证明服务活着，对推进没有任何帮助。真正值钱的线索在 `create_log` 的返回结构里——每次请求都会生成一个哈希命名的 `.log` 文件存进 `/uploads/`，文档里看不到任何容量上限或清理机制。
 
-## 3. DoS：把磁盘刷满，让服务自己交代
+## 3. 刷满磁盘：报错详情里拿用户名
 
 题目叫 DDos，入口又是"无限写文件"，思路就很直白了：循环刷 `create_log`，用文档里的示例原文当内容：
 
@@ -94,7 +94,7 @@ while true ;do curl -X POST http://192.168.134.77:5000/api/create_log \
 }
 ```
 
-**磁盘打满本身不加分，报错详情才是这次的真正产出**：`admin_contact` 直接给出了用户名 `tonglinggejim0`。这台题把"DoS"做成了信息收集的手段——服务资源耗尽时进入异常分支，异常分支里的报错比正常响应话多得多。
+**磁盘打满本身不是终点，报错详情才是这次的产出**：`admin_contact` 直接给出了用户名 `tonglinggejim0`。接口在资源耗尽后进入异常分支，异常响应比正常响应多出 `admin_contact`、`hint` 这类字段——刷盘就是为了触发这个分支。
 
 ## 4. SSH 爆破与 user flag
 
@@ -133,7 +133,7 @@ User tonglinggejim0 may run the following commands on DDos:
 
 ## 5. sudo ab：不拿 shell 也能读 root 文件
 
-`/usr/bin/ab` 是 ApacheBench，一个 HTTP 压测工具。乍看和提权毫无关系，但它的 `-p` 参数会把**指定文件的内容作为 POST body 发出去**（[GTFOBins: ab](https://gtfobins.github.io/gtfobins/ab/) 的 Upload 手法）。sudo 跑它，就是让 root 读任意文件再发到指定地址。
+`/usr/bin/ab` 是 ApacheBench，一个 HTTP 压测工具。乍看和提权无关，但它的 `-p` 参数会把**指定文件的内容作为 POST body 发出去**（[GTFOBins: ab](https://gtfobins.github.io/gtfobins/ab/) 的 Upload 手法）——经 sudo 执行时，目标文件按 root 权限读取，等效任意文件外带。
 
 ![sudo ab 外带 root flag 到 nc 监听](/content/ddos-log-flood-sudo-ab/image-09.webp)
 
@@ -166,15 +166,15 @@ flag{root-429f809b23ee59b37202d1a909096e43}
 | 要点 | 复盘结论 |
 |------|----------|
 | 自述文档 ≠ 全量清单 | 首页接口文档很详细，但 `health`/`quote` 靠 ffuf 补出；目录爆破仍然不可省 |
-| DoS 作为信息收集 | 资源耗尽逼服务走异常分支，`RESOURCE_EXHAUSTED` 的 `details` 里藏着用户名 |
-| 报错详情是富矿 | `admin_contact`、`hint` 这类字段是出题人特意留的；看到非标准报错先读完整 JSON |
+| DoS 作为信息收集 | 资源耗尽使接口进入报错分支，`RESOURCE_EXHAUSTED` 的 `details` 里给出用户名 |
+| 报错详情字段 | `admin_contact`、`hint` 只在异常响应里出现；看到非标准报错先读完整 JSON |
 | sudo 白名单里的冷门工具 | 压测工具 `ab` 也能变任意文件读：`-p` 把文件内容当 POST body 发出，全程不需要 shell |
 
 ## 7. 复盘
 
-这台题最大的收获是**思路转换**：看到 DDos 三个字，第一反应是打崩服务拿 shell 或者找 flag，但这里的 DoS 只是杠杆——真正要的是服务在资源耗尽时吐出来的那行报错。以后遇到带 `details`/`error_code` 结构的 API 报错，值得把整个 JSON 读完整再决定下一步，而不是只看 message。
+这台题的两个关键点都很直白。一是 `create_log` 没有容量上限和清理机制，循环请求就能把磁盘写满；二是写满之后接口进入报错分支，`details.admin_contact` 给出了 SSH 用户名。带 `details`/`error_code` 结构的报错 JSON 要整个读完，有用字段不一定在 `message` 里。
 
-提权环节刷新了我对"sudo 白名单审计"的认知：`sudo -l` 里出现 `ab` 这种压测工具，第一眼很容易当成无害项放过。判断标准不是"这工具是干嘛的"，而是**它能不能读写文件或执行命令**——`-p` 参数让它成了一个 root 身份的文件外带通道。GTFOBins 的 ab 条目就列着这条 Upload 手法，sudo 白名单里每个二进制都值得查一遍。
+提权点是 `sudo -l` 里的 `NOPASSWD: /usr/bin/ab`。压测工具容易被当成无害项，但判断依据是参数而不是工具的常规用途：`-p` 会把指定文件内容作为 POST body 发出，经 sudo 执行就是 root 权限的文件外带。`sudo -l` 的白名单值得逐个对照 GTFOBins 查一遍，`ab`、`zip`、`less` 这类都在列。
 
 ## 参考
 
