@@ -1,5 +1,14 @@
 [
   {
+    "slug": "baba-opencode-mirror-backdoor",
+    "kind": "markdown",
+    "title": "baba 靶机复盘：无认证 opencode 到工具镜像供应链后门",
+    "summary": "群主靶机：8080 opencode 1.18.32 无认证，/session/shell 直接以 jiemu 执行命令；opencode skill 把枚举工具指向内部镜像，自研的 doaswhat 源码干净、release 二进制带 UID 0 后门，su beef-xss 拿 root。",
+    "publishedAt": "2026-10-09",
+    "category": "渗透测试",
+    "source": "/content/baba-opencode-mirror-backdoor.md"
+  },
+  {
     "slug": "ddos-log-flood-sudo-ab",
     "kind": "markdown",
     "title": "DDos 靶机复盘：刷爆日志接口到 sudo ab 外带 root flag",
