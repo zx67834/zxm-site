@@ -1,5 +1,14 @@
 [
   {
+    "slug": "chuanyun-cloud-intranet-chain",
+    "kind": "markdown",
+    "title": "穿云靶机复盘：从制品桶到云内网纵深（一只枷锁）",
+    "summary": "公网阿里云穿云门户：匿名 MinIO 翻出 NYX 源码命令注入，落点令牌进内网，Wiki 信封 + MFA 注释到 OMC/堡垒机双 flag。",
+    "publishedAt": "2026-10-10",
+    "category": "渗透测试",
+    "source": "/content/chuanyun.md"
+  },
+  {
     "slug": "hmv-venus-ssh-1-25",
     "kind": "markdown",
     "title": "HMV Venus SSH 闯关复盘（上）：第 1～25 关",
