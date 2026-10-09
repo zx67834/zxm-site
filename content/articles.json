@@ -1,5 +1,14 @@
 [
   {
+    "slug": "hmv-venus-ssh-1-25",
+    "kind": "markdown",
+    "title": "HMV Venus SSH 闯关复盘（上）：第 1～25 关",
+    "summary": "HMV Venus 第一章前 25 关的逐关考点：ls -a 隐藏文件、find 按类型/大小/属主筛选、sed/grep 取行与捕获组、zip 内路径重建、GECOS 注释字段藏密码、sudo -l、私钥直登和无读权限目录的字典枚举，卡点和弯路照记。",
+    "publishedAt": "2026-10-09",
+    "category": "HackMyVM",
+    "source": "/content/hmv-venus-ssh-1-25.md"
+  },
+  {
     "slug": "baba-opencode-mirror-backdoor",
     "kind": "markdown",
     "title": "baba 靶机复盘：无认证 opencode 到工具镜像供应链后门",
