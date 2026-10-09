@@ -14,11 +14,11 @@ export default function LinksPage() {
     <section className="subpage-content preview-container">
       <p className="section-label">FRIENDS / LINKS</p>
       <h1>友情链接</h1>
-      <p className="subpage-lead">常去看的站点。老师的博客也放在这里。</p>
+      <p className="subpage-lead">持续学习的站点。</p>
       <ul className="friend-links">
         {friendLinks.map(link => <li key={link.href}>
           <a href={link.href} target="_blank" rel="noreferrer">
-            <span>{link.kicker}</span>
+            <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}${link.image}`} alt="" />
             <strong>{link.name}</strong>
             <small>{link.note}</small>
             <em>{link.href.replace(/^https?:\/\//, "").replace(/\/$/, "")}</em>

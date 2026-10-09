@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#24365f"/>
+      <stop offset=".48" stop-color="#c56a52"/>
+      <stop offset="1" stop-color="#f3c56a"/>
+    </linearGradient>
+    <linearGradient id="pane" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe8b8"/>
+      <stop offset="1" stop-color="#f09a55"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" fill="url(#sky)"/>
+  <circle cx="186" cy="58" r="20" fill="#fff4d2"/>
+  <circle cx="196" cy="52" r="16" fill="#2a4068"/>
+  <path d="M0 150c48-28 78-8 118-24 46-18 78 8 138-6v136H0Z" fill="#2c4638"/>
+  <path d="M0 186c58-22 92-6 138-18 42-12 74 10 118-4v92H0Z" fill="#1c3128"/>
+  <rect x="74" y="86" width="108" height="126" rx="8" fill="#f6f1e6"/>
+  <rect x="84" y="96" width="88" height="74" fill="url(#pane)"/>
+  <path d="M128 96v74M84 133h88" fill="none" stroke="#f6f1e6" stroke-width="5"/>
+  <rect x="96" y="182" width="64" height="8" rx="2" fill="#e4d3b4"/>
+  <g transform="rotate(-8 128 176)">
+    <rect x="104" y="164" width="42" height="24" rx="2" fill="#fbf7ee" stroke="#c9b48a" stroke-width="2"/>
+    <path d="M112 172h26M112 178h18" stroke="#c9b48a" stroke-width="2"/>
+  </g>
+</svg>
