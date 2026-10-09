@@ -10,7 +10,7 @@ export default function ArticlesPage() {
     <div className="subpage-background"><NodeField /></div>
     <nav className="subpage-nav preview-container preview-container--wide">
       <SiteLogo />
-      <div><Link href="/">首页</Link><Link href="/articles/archive">归档</Link><Link href="/terminal">终端</Link><ThemeToggle /></div>
+      <div><Link href="/">首页</Link><Link href="/articles/archive">归档</Link><Link href="/links">友链</Link><Link href="/terminal">终端</Link><ThemeToggle /></div>
     </nav>
     <section className="subpage-content preview-container">
       <p className="section-label">ALL ARTICLES / BY DATE</p>

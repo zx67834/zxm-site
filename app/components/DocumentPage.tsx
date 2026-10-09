@@ -16,6 +16,7 @@ export default function DocumentPage({ kind, title, meta, source }: DocumentPage
       <SiteLogo />
       <div>
         <Link href="/articles">全部文章</Link>
+        <Link href="/links">友链</Link>
         <Link href="/terminal">终端</Link>
         <ThemeToggle />
       </div>

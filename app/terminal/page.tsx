@@ -9,7 +9,7 @@ export default function TerminalPage() {
     <div className="subpage-background"><NodeField /></div>
     <nav className="subpage-nav preview-container preview-container--wide">
       <SiteLogo />
-      <div><Link href="/">首页</Link><Link href="/articles">文章</Link><ThemeToggle /></div>
+      <div><Link href="/">首页</Link><Link href="/articles">文章</Link><Link href="/links">友链</Link><ThemeToggle /></div>
     </nav>
     <section className="subpage-content preview-container">
       <header className="terminal-intro">

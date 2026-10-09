@@ -76,6 +76,7 @@ export default function Home() {
         <SiteLogo />
         <div>
           <Link href="/articles">文章</Link>
+          <Link href="/links">友链</Link>
           <Link href="/terminal">终端</Link>
           <ThemeToggle />
         </div>

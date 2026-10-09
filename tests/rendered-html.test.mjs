@@ -63,7 +63,13 @@ test("keeps reading and accessibility refinements in place", async () => {
   assert.match(reader, /if \(line\.startsWith\("# "\)\) continue/);
   assert.match(reader, /className="article-toc-mobile"/);
   assert.match(reader, /aria-label="文章目录"/);
+  assert.match(home, /href="\/links"/);
   assert.match(home, /className="heatmap" aria-hidden="true"/);
+  const linksPage = await readFile(new URL("../app/links/page.tsx", import.meta.url), "utf8");
+  const linksData = await readFile(new URL("../app/data/links.ts", import.meta.url), "utf8");
+  assert.match(linksPage, /友情链接/);
+  assert.match(linksData, /闲时小记/);
+  assert.match(linksData, /https:\/\/gaolb\.cn\//);
   assert.match(home, /className="sr-only"/);
   assert.match(nodeField, /prefers-reduced-motion: reduce/);
   assert.match(nodeField, /visibilitychange/);
