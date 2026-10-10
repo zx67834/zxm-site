@@ -2,7 +2,7 @@
 
 > [HackMyVM | Venus](https://hackmyvm.eu/venus/) 是公开的 Linux 基础闯关平台，本文记录我在这个授权环境里的做题过程，操作只发生在平台分配的靶机内。
 
-Venus 是 HMV 的第一章，题目本身不难，正好借它把 Linux 基础命令的参数过一遍。所以这篇不是纯 wp：每关记题目要求、考点、命令和现场解释，卡住的地方保留弯路。上篇覆盖第 1～25 关，0x26 之后进入 HTTP、MySQL 和进程方向，放下篇。
+Venus 是 HMV 的第一章，题目本身不难，正好借它把 Linux 基础命令的参数过一遍。所以这篇不是纯 wp：每关记题目要求、考点、命令和现场解释，卡住的地方保留弯路。上篇覆盖第 1～25 关，0x26 之后进入 HTTP、MySQL 和权限工具，记在[下篇](/articles/read?slug=hmv-venus-ssh-26-50)。
 
 ![HMV Venus 平台页面](/content/hmv-venus-ssh-1-25/image-01.webp)
 
@@ -484,4 +484,4 @@ mxq9O3MSxxX9Q3S
 - 25 关用到的命令面很小：ls、find、grep、sed、awk、uniq、xxd、base64、unzip、ssh/scp、sudo，难度全在参数组合和边界条件上。
 - 真正卡人的是三类边界：文件名和路径的特殊性（`-` 文件、zip 内路径重建、无读权限目录）；凭据不在"它该在的位置"（GECOS 注释字段、环境变量、别人的私钥、定时生成又删除的文件）；同名或相近数据源要交叉确认（0x02 的空文件）。
 - 顺序上养成的习惯：先 `ls -ld` 看权限位、`file` 看真实类型，再决定是直接读、解压，还是按字典枚举。
-- 0x26 之后题目开始碰 HTTP、MySQL、进程信息和 hydra 爆破，放进下篇。
+- 0x26 之后题目开始碰 HTTP、MySQL、hydra 和 doas，记在[下篇](/articles/read?slug=hmv-venus-ssh-26-50)。

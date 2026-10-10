@@ -1,5 +1,14 @@
 [
   {
+    "slug": "hmv-venus-ssh-26-50",
+    "kind": "markdown",
+    "title": "HMV Venus SSH 闯关复盘（下）：第 26～50 关",
+    "summary": "HMV Venus 后 25 关：本机 HTTP 的方法、UA 和自定义头，Vim swap 恢复后 hydra 打 SSH，MySQL 与 /etc/passwd 求交集，file 识破伪装 tar，strings、二维码、ISO、diff、RSA、摩尔斯、EXIF、doas、hidden 组和 BIND TXT。最后一关的密码就是前面解过的摩尔斯明文。",
+    "publishedAt": "2026-10-10",
+    "category": "HackMyVM",
+    "source": "/content/hmv-venus-ssh-26-50.md"
+  },
+  {
     "slug": "chuanyun-cloud-intranet-chain",
     "kind": "markdown",
     "title": "穿云靶机复盘：从制品桶到云内网纵深（一只枷锁）",
