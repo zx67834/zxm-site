@@ -1,5 +1,15 @@
 [
   {
+    "slug": "krayin2-installer-bypass-artisan-cron",
+    "kind": "pdf",
+    "title": "Krayin2 靶机复盘：安装接口接管到可写 artisan 提权",
+    "summary": "CVE-2026-41452 未授权安装接口拿 admin，邮箱附件上传 RCE；root cron 跑可写 artisan 出 flag。",
+    "publishedAt": "2026-10-22",
+    "category": "渗透测试",
+    "source": "/content/krayin2.pdf",
+    "pages": 9
+  },
+  {
     "slug": "hmv-venus-ssh-26-50",
     "kind": "markdown",
     "title": "HMV Venus SSH 闯关复盘（下）：第 26～50 关",
