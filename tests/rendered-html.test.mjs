@@ -70,6 +70,8 @@ test("keeps reading and accessibility refinements in place", async () => {
   assert.match(linksPage, /友情链接/);
   assert.match(linksData, /闲时小记/);
   assert.match(linksData, /https:\/\/gaolb\.cn\//);
+  assert.match(linksData, /nini/);
+  assert.match(linksData, /https:\/\/mengdaozhe\.icu\//);
   assert.match(home, /className="sr-only"/);
   assert.match(nodeField, /prefers-reduced-motion: reduce/);
   assert.match(nodeField, /visibilitychange/);

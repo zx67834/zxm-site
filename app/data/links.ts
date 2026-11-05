@@ -12,4 +12,10 @@ export const friendLinks: FriendLink[] = [
     note: "老师的博客",
     image: "/links/xianshi.svg",
   },
+  {
+    name: "nini",
+    href: "https://mengdaozhe.icu/",
+    note: "同学的博客",
+    image: "/links/nini.png",
+  },
 ];
