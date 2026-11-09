@@ -1,5 +1,15 @@
 [
   {
+    "slug": "phpblog-typecho-blogbackup",
+    "kind": "pdf",
+    "title": "phpblog 靶机复盘：Typecho Php2Shell 到 blogbackup 提权",
+    "summary": "Typecho 投稿页 session 序列化错配 + upload_progress 注入拿 momo；本机 blogbackup 任意文件写入 cron 提到 root。",
+    "publishedAt": "2026-10-24",
+    "category": "渗透测试",
+    "source": "/content/phpblog.pdf",
+    "pages": 13
+  },
+  {
     "slug": "krayin2-installer-bypass-artisan-cron",
     "kind": "pdf",
     "title": "Krayin2 靶机复盘：安装接口接管到可写 artisan 提权",
