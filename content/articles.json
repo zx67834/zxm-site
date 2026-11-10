@@ -1,5 +1,15 @@
 [
   {
+    "slug": "conduit-modbus-valve",
+    "kind": "pdf",
+    "title": "Conduit 靶机复盘：未认证 Modbus/TCP 阀门标签命令注入到 root",
+    "summary": "未认证的 Modbus/TCP 502 写入阀门标签，触发 conduit-ctl 命令注入，直接拿到 root。",
+    "publishedAt": "2026-11-09",
+    "category": "渗透测试",
+    "source": "/content/conduit.pdf",
+    "pages": 6
+  },
+  {
     "slug": "phpblog-typecho-blogbackup",
     "kind": "pdf",
     "title": "phpblog 靶机复盘：Typecho Php2Shell 到 blogbackup 提权",
