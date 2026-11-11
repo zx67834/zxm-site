@@ -9,7 +9,7 @@ export const friendLinks: FriendLink[] = [
   {
     name: "闲时小记",
     href: "https://gaolb.cn/",
-    note: "高老师",
+    note: "高老师的博客",
     image: "/links/xianshi.svg",
   },
   {
