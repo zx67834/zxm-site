@@ -18,4 +18,10 @@ export const friendLinks: FriendLink[] = [
     note: "同学的博客",
     image: "/links/nini.png",
   },
+  {
+    name: "侯君谦成神计划",
+    href: "https://www.hackhbaby.online/",
+    note: "田总的博客",
+    image: "/links/hackhbaby.svg",
+  },
 ];
